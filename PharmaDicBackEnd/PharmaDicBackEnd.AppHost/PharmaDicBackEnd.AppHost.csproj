@@ -1,0 +1,16 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.2.4">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>21f70f39-0dab-4ac2-9edc-e3d7c356acf3</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PharmaDicBackEnd.ApiService\PharmaDicBackEnd.ApiService.csproj" />
+    <ProjectReference Include="..\PharmaDicBackEnd.Web\PharmaDicBackEnd.Web.csproj" />
+  </ItemGroup>
+
+</Project>
