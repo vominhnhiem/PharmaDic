@@ -15,7 +15,6 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
 
-        // Tiêm (Inject) DbContext để gọi Database và IConfiguration để đọc appsettings.json
         public AuthController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
@@ -33,10 +32,6 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                 return Unauthorized(new { message = "Email hoặc mật khẩu không chính xác." });
             }
 
-            // [LỖ HỔNG BẢO MẬT]: Ở đây đang so sánh chuỗi mật khẩu trần (PlainText).
-            // Dữ liệu từ file SQL của bạn chưa có cơ chế rắc muối (Salting).
-            // Sau này bạn BẮT BUỘC phải dùng thư viện BCrypt.Net để Verify Hash chỗ này.
-            // Tạm thời để test API, chúng ta so sánh trực tiếp.
             if (user.PasswordHash != request.Password)
             {
                 return Unauthorized(new { message = "Email hoặc mật khẩu không chính xác." });
@@ -50,7 +45,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             {
                 message = "Đăng nhập thành công",
                 token = token,
-                role = user.Role // Gửi kèm Role để Mobile dễ phân quyền giao diện
+                role = user.Role
             });
         }
 
