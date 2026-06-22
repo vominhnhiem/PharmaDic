@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PharmaDicBackEnd.ApiService.Data; // Đảm bảo namespace này khớp với project của bạn
-
+using PharmaDicBackEnd.ApiService.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
