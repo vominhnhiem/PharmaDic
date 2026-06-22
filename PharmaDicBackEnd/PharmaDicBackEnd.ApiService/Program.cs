@@ -11,6 +11,13 @@ builder.AddServiceDefaults();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowMobileApp", policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -74,7 +81,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseCors("AllowMobileApp");
 app.UseAuthentication();
 app.UseAuthorization();        
 
