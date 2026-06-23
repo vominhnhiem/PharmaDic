@@ -156,5 +156,39 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                 return BadRequest(new { message = "Không thể xóa bệnh lý này vì đang có các triệu chứng hoặc thuốc gợi ý liên kết. Hãy xóa các liên kết trước." });
             }
         }
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Gắn danh sách triệu chứng vào một bệnh lý cụ thể (Mapping Nhiều-Nhiều)
+        /// </summary>
+        [HttpPost("{id}/symptoms")]
+        public IActionResult AssignSymptomsToDisease(int id, [FromBody] List<int> symptomIds)
+        {
+            var disease = _context.Diseases
+                .Include(d => d.Symptoms)
+                .FirstOrDefault(d => d.DiseaseId == id);
+
+            if (disease == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy bệnh lý với ID = {id}." });
+            }
+
+            var validSymptoms = _context.Symptoms
+                .Where(s => symptomIds.Contains(s.SymptomId))
+                .ToList();
+
+            if (validSymptoms.Count != symptomIds.Count)
+            {
+                return BadRequest(new { message = "Một hoặc nhiều ID triệu chứng gửi lên không tồn tại trong hệ thống." });
+            }
+
+            disease.Symptoms.Clear();
+            foreach (var symptom in validSymptoms)
+            {
+                disease.Symptoms.Add(symptom);
+            }
+
+            _context.SaveChanges();
+
+            return Ok(new { message = "Cập nhật danh sách triệu chứng cho bệnh lý thành công!" });
+        }
     }
 }
