@@ -18,7 +18,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         }
 
         /// <summary>
-        /// [PUBLIC] Lấy toàn bộ danh sách triệu chứng (Dùng cho cả Mobile và Web)
+        /// [PUBLIC] Lấy toàn bộ danh sách triệu chứng
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
@@ -31,7 +31,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         }
 
         /// <summary>
-        /// [ADMIN/DƯỢC SĨ] Thêm mới triệu chứng vào từ điển
+        /// [ADMIN/DƯỢC SĨ] Thêm mới triệu chứng
         /// </summary>
         [HttpPost]
         public IActionResult CreateSymptom([FromBody] SymptomInputDto dto)
