@@ -16,8 +16,11 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// [PUBLIC] Lấy danh sách toàn bộ danh mục thuốc
+        /// </summary>
         [HttpGet]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         public IActionResult GetAllCategories()
         {
             var categories = _context.MedicineCategories
@@ -31,6 +34,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return Ok(categories);
         }
 
+        /// <summary>
+        /// [ADMIN] Thêm mới một danh mục thuốc vào hệ thống
+        /// </summary>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public IActionResult CreateCategory([FromBody] MedicineCategoryInputDto dto)
@@ -49,6 +55,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return CreatedAtAction(nameof(GetAllCategories), new { message = "Thêm danh mục thành công!", id = category.CategoryId });
         }
 
+        /// <summary>
+        /// [ADMIN] Cập nhật thông tin của một danh mục thuốc
+        /// </summary>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public IActionResult UpdateCategory(int id, [FromBody] MedicineCategoryInputDto dto)
@@ -68,7 +77,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return Ok(new { message = "Cập nhật danh mục thành công!" });
         }
 
-
+        /// <summary>
+        /// [ADMIN] Xóa vĩnh viễn một danh mục thuốc (Có kiểm tra ràng buộc)
+        /// </summary>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public IActionResult DeleteCategory(int id)

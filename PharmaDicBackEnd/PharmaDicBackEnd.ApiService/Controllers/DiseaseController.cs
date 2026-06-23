@@ -8,18 +8,21 @@ namespace PharmaDicBackEnd.ApiService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Dược sĩ")]
+    [Authorize(Roles = "Admin,Dược sĩ")] // Khóa bảo mật toàn cục cho Controller
     public class DiseaseController : ControllerBase
     {
-        private readonly DrugLookupAppContext _context; // Đã đổi tên context theo đúng file tự sinh của bạn
+        private readonly DrugLookupAppContext _context;
 
         public DiseaseController(DrugLookupAppContext context)
         {
             _context = context;
         }
 
+        /// <summary>
+        /// [PUBLIC] Tra cứu danh sách bệnh lý theo từ khóa
+        /// </summary>
         [HttpGet("search")]
-        [AllowAnonymous]
+        [AllowAnonymous] // Ngoại lệ: Mở cho toàn bộ người dùng
         public IActionResult SearchDiseases([FromQuery] string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
@@ -32,7 +35,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                 .Where(d => d.DiseaseName.Contains(keyword) ||
                             d.Symptoms.Any(s => s.SymptomName.Contains(keyword)))
                 .Take(50)
-                .ToList(); // Kéo data về bộ nhớ vật lý của máy chủ
+                .ToList();
 
             if (!diseasesFromDb.Any())
             {
@@ -49,6 +52,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// [PUBLIC] Xem chi tiết thông tin một bệnh lý bao gồm triệu chứng và thuốc gợi ý
+        /// </summary>
         [HttpGet("{id}")]
         [AllowAnonymous]
         public IActionResult GetDiseaseById(int id)
@@ -64,9 +70,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                     DiseaseName = d.DiseaseName,
                     Description = d.Description,
                     WarningSigns = d.WarningSigns,
-
                     Symptoms = d.Symptoms.Select(s => s.SymptomName).ToList(),
-
                     SuggestedMedicines = d.DiseaseMedicines.Select(dm => new SuggestedMedicineDto
                     {
                         MedicineId = dm.Medicine.MedicineId,
@@ -83,6 +87,74 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             }
 
             return Ok(disease);
+        }
+
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Thêm mới một bệnh lý vào hệ thống
+        /// </summary>
+        [HttpPost]
+        public IActionResult CreateDisease([FromBody] DiseaseInputDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var newDisease = new Disease
+            {
+                DiseaseName = dto.DiseaseName,
+                Description = dto.Description,
+                WarningSigns = dto.WarningSigns
+            };
+
+            _context.Diseases.Add(newDisease);
+            _context.SaveChanges();
+
+            return CreatedAtAction(nameof(GetDiseaseById), new { id = newDisease.DiseaseId }, new { message = "Thêm bệnh lý thành công!", id = newDisease.DiseaseId });
+        }
+
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Cập nhật thông tin bệnh lý
+        /// </summary>
+        [HttpPut("{id}")]
+        public IActionResult UpdateDisease(int id, [FromBody] DiseaseInputDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var disease = _context.Diseases.FirstOrDefault(d => d.DiseaseId == id);
+            if (disease == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy bệnh lý với ID = {id}" });
+            }
+
+            disease.DiseaseName = dto.DiseaseName;
+            disease.Description = dto.Description;
+            disease.WarningSigns = dto.WarningSigns;
+
+            _context.SaveChanges();
+            return Ok(new { message = "Cập nhật thông tin bệnh lý thành công!" });
+        }
+
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Xóa vĩnh viễn bệnh lý
+        /// </summary>
+        [HttpDelete("{id}")]
+        public IActionResult DeleteDisease(int id)
+        {
+            var disease = _context.Diseases.FirstOrDefault(d => d.DiseaseId == id);
+            if (disease == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy bệnh lý với ID = {id} để xóa." });
+            }
+
+            try
+            {
+                _context.Diseases.Remove(disease);
+                _context.SaveChanges();
+                return Ok(new { message = "Xóa bệnh lý thành công!" });
+            }
+            catch (Exception)
+            {
+                // Bẻ gãy lỗi 500 khi vướng khóa ngoại ở bảng Symptoms hoặc DiseaseMedicines
+                return BadRequest(new { message = "Không thể xóa bệnh lý này vì đang có các triệu chứng hoặc thuốc gợi ý liên kết. Hãy xóa các liên kết trước." });
+            }
         }
     }
 }

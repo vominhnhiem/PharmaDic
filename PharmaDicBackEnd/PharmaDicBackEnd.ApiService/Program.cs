@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PharmaDicBackEnd.ApiService.Models;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 
@@ -40,6 +41,9 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    c.IncludeXmlComments(xmlPath);
 });
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
