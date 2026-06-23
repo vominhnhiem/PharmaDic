@@ -8,7 +8,6 @@ namespace PharmaDicBackEnd.ApiService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin, Dược sĩ")]
     public class MedicineController : ControllerBase
     {
         private readonly DrugLookupAppContext _context;
@@ -84,6 +83,105 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             }
 
             return Ok(medicine);
+        }
+
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Dược sĩ")]
+        public IActionResult CreateMedicine([FromBody] CreateMedicineDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newMedicine = new Medicine
+            {
+                MedicineName = dto.MedicineName,
+                CategoryId = dto.CategoryId,
+                DosageForm = dto.DosageForm,
+                Strength = dto.Strength,
+                Manufacturer = dto.Manufacturer,
+                Country = dto.Country,
+                Uses = dto.Uses,
+                Dosage = dto.Dosage,
+                Contraindications = dto.Contraindications,
+                SideEffects = dto.SideEffects,
+                Storage = dto.Storage,
+                Note = dto.Note
+            };
+
+            _context.Medicines.Add(newMedicine);
+            _context.SaveChanges();
+
+            return CreatedAtAction(nameof(GetMedicineById), new { id = newMedicine.MedicineId }, new { message = "Thêm thuốc thành công!", id = newMedicine.MedicineId });
+        }
+
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Dược sĩ")]
+        public IActionResult UpdateMedicine(int id, [FromBody] UpdateMedicineDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var medicine = _context.Medicines.FirstOrDefault(m => m.MedicineId == id);
+
+            if (medicine == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy thuốc với ID = {id} để cập nhật." });
+            }
+
+            if (dto.CategoryId.HasValue)
+            {
+                var categoryExists = _context.MedicineCategories.Any(c => c.CategoryId == dto.CategoryId.Value);
+                if (!categoryExists)
+                {
+                    return BadRequest(new { message = $"Danh mục thuốc với ID = {dto.CategoryId} không tồn tại trong hệ thống." });
+                }
+            }
+
+            medicine.MedicineName = dto.MedicineName;
+            medicine.CategoryId = dto.CategoryId;
+            medicine.DosageForm = dto.DosageForm;
+            medicine.Strength = dto.Strength;
+            medicine.Manufacturer = dto.Manufacturer;
+            medicine.Country = dto.Country;
+            medicine.Uses = dto.Uses;
+            medicine.Dosage = dto.Dosage;
+            medicine.Contraindications = dto.Contraindications;
+            medicine.SideEffects = dto.SideEffects;
+            medicine.Storage = dto.Storage;
+            medicine.Note = dto.Note;
+
+            _context.SaveChanges();
+
+            return Ok(new { message = "Cập nhật thông tin thuốc thành công!" });
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Dược sĩ")]
+        public IActionResult DeleteMedicine(int id)
+        {
+            var medicine = _context.Medicines.FirstOrDefault(m => m.MedicineId == id);
+
+            if (medicine == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy thuốc với ID = {id} để xóa." });
+            }
+
+            try
+            {
+                _context.Medicines.Remove(medicine);
+                _context.SaveChanges();
+                return Ok(new { message = "Xóa thuốc khỏi hệ thống thành công!" });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { message = "Không thể xóa thuốc này vì nó đang liên kết với dữ liệu hoạt chất hoặc bệnh lý khác. Hãy xóa liên kết trước." });
+            }
         }
     }
 }
