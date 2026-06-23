@@ -56,16 +56,22 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
-            // Nhét dữ liệu của Dược sĩ vào bên trong thân Token (Claims)
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Role, user.Role ?? "Người dùng") // Rất quan trọng cho TASK-114
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
             };
 
-            // Cấu hình thuật toán mã hóa
+            if (!string.IsNullOrEmpty(user.Role))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, user.Role));
+            }
+            else
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Dược sĩ"));
+            }
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
