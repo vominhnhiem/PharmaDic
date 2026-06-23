@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using PharmaDicBackEnd.ApiService.Models;
 
-namespace PharmaDicBackEnd.ApiService.Data;
+namespace PharmaDicBackEnd.ApiService.Models;
 
-public partial class AppDbContext : DbContext
+public partial class DrugLookupAppContext : DbContext
 {
-    public AppDbContext()
+    public DrugLookupAppContext()
     {
     }
 
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public DrugLookupAppContext(DbContextOptions<DrugLookupAppContext> options)
         : base(options)
     {
     }
@@ -39,6 +38,10 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Symptom> Symptoms { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-GUATJSF\\SQLEXPRESS;Database=DrugLookupApp;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using PharmaDicBackEnd.ApiService.Data;
+using PharmaDicBackEnd.ApiService.Models;
 using PharmaDicBackEnd.ApiService.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,10 +12,10 @@ namespace PharmaDicBackEnd.ApiService.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly DrugLookupAppContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthController(AppDbContext context, IConfiguration configuration)
+        public AuthController(DrugLookupAppContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
