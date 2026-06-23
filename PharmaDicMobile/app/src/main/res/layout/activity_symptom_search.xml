@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="#F8F9FA"
+    android:fitsSystemWindows="true"
     tools:context=".SymptomSearchActivity">
 
     <!-- Header -->
@@ -25,14 +26,14 @@
                 android:layout_height="24dp"
                 android:layout_centerVertical="true"
                 android:src="@android:drawable/ic_menu_sort_by_size"
-                app:tint="@color/primary" />
+                app:tint="#006A60" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="PharmaCheck"
-                android:textColor="@color/primary"
+                android:textColor="#006A60"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -42,7 +43,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:src="@android:drawable/ic_popup_reminder"
-                app:tint="@color/primary" />
+                app:tint="#006A60" />
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -64,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Nhập triệu chứng của bệnh nhân"
-                android:textColor="@color/on_background"
+                android:textColor="#1D1B20"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -73,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Hãy mô tả chi tiết để trợ lý AI hỗ trợ tìm kiếm thuốc chính xác hơn."
-                android:textColor="@color/on_surface_variant"
+                android:textColor="#49454F"
                 android:textSize="14sp" />
 
             <!-- Search Input Area -->
@@ -90,7 +91,7 @@
                     android:gravity="top|start"
                     android:hint="Mô tả triệu chứng... (ví dụ: Sốt cao, đau đầu, đau họng)"
                     android:padding="16dp"
-                    android:textColor="@color/on_background"
+                    android:textColor="#1D1B20"
                     android:textSize="16sp" />
 
                 <LinearLayout
@@ -107,19 +108,20 @@
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:src="@android:drawable/ic_btn_speak_now"
-                        app:tint="@color/outline" />
+                        app:tint="#79747E" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:text="Bấm để nói"
-                        android:textColor="@color/outline"
+                        android:textColor="#79747E"
                         android:textSize="11sp" />
                 </LinearLayout>
             </RelativeLayout>
 
             <Button
+                android:id="@+id/btnSearchSymptoms"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="16dp"
@@ -139,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:text="GỢI Ý NHANH"
-                android:textColor="@color/on_surface_variant"
+                android:textColor="#79747E"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -154,7 +156,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đau đầu + sốt"
-                    app:chipBackgroundColor="@color/surface_container"
                     app:chipCornerRadius="20dp"
                     app:chipStrokeWidth="0dp" />
 
@@ -163,7 +164,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Ho khan + đau họng"
-                    app:chipBackgroundColor="@color/surface_container"
                     app:chipCornerRadius="20dp"
                     app:chipStrokeWidth="0dp" />
 
@@ -172,60 +172,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đau bụng + ợ nóng"
-                    app:chipBackgroundColor="@color/surface_container"
-                    app:chipCornerRadius="20dp"
-                    app:chipStrokeWidth="0dp" />
-
-                <com.google.android.material.chip.Chip
-                    style="@style/Widget.MaterialComponents.Chip.Action"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Mệt mỏi + chóng mặt"
-                    app:chipBackgroundColor="@color/surface_container"
                     app:chipCornerRadius="20dp"
                     app:chipStrokeWidth="0dp" />
             </com.google.android.material.chip.ChipGroup>
-
-            <!-- Info Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:layout_marginBottom="24dp"
-                android:background="@drawable/action_card_bg"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <View
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/logo_bg"
-                    android:backgroundTint="#2000685f" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Cơ sở dữ liệu cập nhật"
-                        android:textColor="@color/on_background"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Thông tin từ 5,000+ danh mục thuốc chính thống."
-                        android:textColor="@color/on_surface_variant"
-                        android:textSize="11sp" />
-                </LinearLayout>
-            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
@@ -234,16 +183,19 @@
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="72dp"
         android:background="@color/white"
         android:elevation="8dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
+            android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -251,14 +203,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_view"
-                app:tint="@color/on_surface_variant" />
+                app:tint="#49454F" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Trang chủ"
-                android:textColor="@color/on_surface_variant"
+                android:textColor="#49454F"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -273,58 +225,64 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_search"
-                app:tint="@color/primary" />
+                app:tint="#006A60" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Tra cứu"
-                android:textColor="@color/primary"
+                android:textColor="#006A60"
                 android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/navAI"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_send"
-                app:tint="@color/on_surface_variant" />
+                android:src="@android:drawable/ic_menu_help"
+                app:tint="#49454F" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Trợ lý AI"
-                android:textColor="@color/on_surface_variant"
+                android:textColor="#49454F"
                 android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/navHistory"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="@color/on_surface_variant" />
+                android:src="@android:drawable/ic_menu_recent_history"
+                app:tint="#49454F" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Tài khoản"
-                android:textColor="@color/on_surface_variant"
+                android:text="Lịch sử"
+                android:textColor="#49454F"
                 android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>

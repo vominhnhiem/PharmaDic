@@ -11,7 +11,7 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="50dp"
         android:background="#CCFFFFFF"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent">
@@ -31,12 +31,12 @@
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/avatarContainer"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="12dp"
                 android:layout_toEndOf="@id/btnBack"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="0dp">
 
                 <ImageView
@@ -59,7 +59,7 @@
                     android:layout_height="wrap_content"
                     android:text="AI Dược lý"
                     android:textColor="#00685F"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -67,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:text="Chuyên gia dược lâm sàng"
                     android:textColor="#3D4947"
-                    android:textSize="12sp" />
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <ImageView
@@ -101,12 +101,12 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_maxWidth="300dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="300dp"
                     android:background="@drawable/bg_ai_message"
                     android:padding="12dp"
                     android:text="Chào Dược sĩ, tôi có thể hỗ trợ gì cho bạn trong việc tra cứu tương tác thuốc hoặc liều dùng lâm sàng hôm nay?"
@@ -128,12 +128,12 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="16dp"
-                android:layout_maxWidth="300dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="300dp"
                     android:background="@drawable/bg_user_message"
                     android:padding="12dp"
                     android:text="Kiểm tra tương tác thuốc giữa Metformin và Ciprofloxacin giúp tôi nhé."
@@ -224,7 +224,7 @@
                                 android:text="Ức chế cạnh tranh"
                                 android:textColor="#0B1C30"
                                 android:textSize="14sp"
-                                android:textStyle="medium" />
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -250,7 +250,7 @@
                                 android:text="Hạ đường huyết"
                                 android:textColor="#0B1C30"
                                 android:textSize="14sp"
-                                android:textStyle="medium" />
+                                android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -270,12 +270,12 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="16dp"
-                android:layout_maxWidth="300dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxWidth="300dp"
                     android:background="@drawable/bg_user_message"
                     android:padding="12dp"
                     android:text="Cần điều chỉnh liều như thế nào?"
@@ -297,7 +297,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_maxWidth="300dp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -310,6 +309,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:maxWidth="300dp"
                         android:text="Theo khuyến cáo lâm sàng:"
                         android:textColor="#0B1C30"
                         android:textSize="14sp" />
@@ -317,6 +317,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:maxWidth="300dp"
                         android:layout_marginTop="8dp"
                         android:text="• Theo dõi sát chỉ số đường huyết mao mạch.\n• Cân nhắc giảm liều Metformin nếu xuất hiện triệu chứng hạ đường huyết.\n• Đảm bảo bệnh nhân đủ nước để tránh độc tính thận."
                         android:textColor="#0B1C30"

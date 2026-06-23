@@ -4,110 +4,82 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="#F8F9FA"
+    android:fitsSystemWindows="true"
     tools:context=".SearchResultsActivity">
 
-    <!-- Top App Bar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="wrap_content"
         android:background="@color/white"
+        android:elevation="2dp"
+        android:orientation="vertical"
+        android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingEnd="16dp">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_menu_sort_by_size"
-                app:tint="@color/primary" />
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#1D1B20" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="PharmaCheck"
-                android:textColor="@color/primary"
-                android:textSize="20sp"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:text="Kết quả tìm kiếm"
+                android:textColor="#1D1B20"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_popup_reminder"
-                app:tint="@color/primary" />
-        </RelativeLayout>
-    </androidx.appcompat.widget.Toolbar>
+                android:src="@android:drawable/ic_menu_manage"
+                app:tint="#006A60" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvSearchQuery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Kết quả cho 'Paracetamol'"
+            android:textColor="#49454F"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:fillViewport="true"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintTop_toBottomOf="@id/header">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Kết quả gợi ý thuốc"
-                android:textColor="@color/on_background"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <!-- Symptom Info Chip -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/edit_text_bg"
-                android:backgroundTint="@color/surface_container_low"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="12dp">
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@android:drawable/ic_dialog_info"
-                    app:tint="@color/primary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Dựa trên triệu chứng: "
-                    android:textColor="@color/on_surface_variant"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sốt cao, đau đầu"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Medicine Card 1 -->
+            <!-- Featured Result Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -115,187 +87,155 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <RelativeLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:background="#F5F5F5"
+                            android:padding="12dp"
+                            android:src="@android:drawable/ic_menu_gallery"
+                            app:tint="#9E9E9E" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_toStartOf="@id/ivMedicine1"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Paracetamol 500mg"
-                                android:textColor="@color/primary"
-                                android:textSize="18sp"
+                                android:textColor="#1D1B20"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
 
-                            <LinearLayout
-                                android:layout_width="wrap_content"
+                            <TextView
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:orientation="horizontal">
+                                android:layout_marginTop="2dp"
+                                android:text="Hộp 10 vỉ x 10 viên"
+                                android:textColor="#49454F"
+                                android:textSize="13sp" />
 
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/tag_bg"
-                                    android:paddingHorizontal="8dp"
-                                    android:paddingVertical="2dp"
-                                    android:text="Hạ sốt"
-                                    android:textColor="@color/primary"
-                                    android:textSize="11sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="8dp"
-                                    android:background="@drawable/tag_bg"
-                                    android:paddingHorizontal="8dp"
-                                    android:paddingVertical="2dp"
-                                    android:text="Giảm đau"
-                                    android:textColor="@color/primary"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="32.500đ"
+                                android:textColor="#006A60"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
-
-                        <ImageView
-                            android:id="@+id/ivMedicine1"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:layout_alignParentEnd="true"
-                            android:scaleType="centerCrop"
-                            android:src="@android:drawable/ic_menu_gallery" />
-                    </RelativeLayout>
+                    </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@color/outline_variant"
-                        android:alpha="0.3" />
+                        android:layout_marginVertical="12dp"
+                        android:background="#EEEEEE" />
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="vertical">
+                        android:lineSpacingExtra="4dp"
+                        android:text="Dùng để giảm đau từ nhẹ đến trung bình bao gồm đau đầu, đau nửa đầu, đau cơ, đau họng, đau răng..."
+                        android:textColor="#49454F"
+                        android:textSize="13sp" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:src="@android:drawable/ic_menu_recent_history"
-                                app:tint="@color/on_surface_variant" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:text="Liều dùng: 1 viên mỗi 4-6h"
-                                android:textColor="@color/on_surface_variant"
-                                android:textSize="14sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:src="@android:drawable/ic_dialog_alert"
-                                app:tint="#ba1a1a" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:text="Chống chỉ định: Suy gan nặng"
-                                android:textColor="#ba1a1a"
-                                android:textSize="14sp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnViewDetails"
                         android:layout_width="match_parent"
-                        android:layout_height="44dp"
+                        android:layout_height="48dp"
                         android:layout_marginTop="16dp"
-                        android:background="@drawable/button_primary_bg"
                         android:text="Xem chi tiết"
                         android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        app:backgroundTint="#6750A4"
+                        app:cornerRadius="24dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- AI Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Tất cả kết quả"
+                android:textColor="#1D1B20"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- Lưu ý -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:paddingHorizontal="16dp"
+                android:text="* Lưu ý: Các gợi ý trên chỉ mang tính chất tham khảo. Vui lòng tham vấn ý kiến bác sĩ trước khi sử dụng."
+                android:textColor="#79747E"
+                android:textSize="11sp"
+                android:textStyle="italic" />
+
+            <!-- Khung Trợ giúp AI (Xanh đậm) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:background="@drawable/hero_bg"
+                android:background="@drawable/bg_ai_suggestion_dark"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <View
+                <androidx.cardview.widget.CardView
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:background="@drawable/logo_bg"
-                    android:backgroundTint="#40FFFFFF" />
+                    app:cardBackgroundColor="#2A8B82"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="10dp"
+                        android:src="@android:drawable/ic_menu_help"
+                        app:tint="@color/white" />
+                </androidx.cardview.widget.CardView>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="16dp"
                     android:text="Không tìm thấy?"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:text="Trao đổi với Trợ lý AI để nhận được tư vấn chi tiết hơn về tình trạng của bạn."
-                    android:textColor="#CCFFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="14sp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="16dp"
-                    android:background="@drawable/card_bg"
-                    android:text="Hỏi AI tư vấn thêm"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="24dp"
+                    android:text="Hỏi AI tư vấn thêm →"
                     android:textAllCaps="false"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp" />
+                    android:textColor="#006A60"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/white"
+                    app:cornerRadius="12dp" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="40dp"
-                android:gravity="center"
-                android:italic="true"
-                android:text="* Lưu ý: Các gợi ý trên chỉ mang tính chất tham khảo. Vui lòng tham vấn ý kiến bác sĩ trước khi sử dụng."
-                android:textColor="@color/on_surface_variant"
-                android:textSize="11sp" />
 
         </LinearLayout>
     </ScrollView>
@@ -304,7 +244,7 @@
     <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="72dp"
         android:background="@color/white"
         android:elevation="8dp"
         android:orientation="horizontal"
@@ -321,14 +261,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_view"
-                app:tint="@color/on_surface_variant" />
+                app:tint="#49454F" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Trang chủ"
-                android:textColor="@color/on_surface_variant"
+                android:textColor="#49454F"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -343,14 +283,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_search"
-                app:tint="@color/primary" />
+                app:tint="#006A60" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Tra cứu"
-                android:textColor="@color/primary"
+                android:textColor="#006A60"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -364,15 +304,15 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_send"
-                app:tint="@color/on_surface_variant" />
+                android:src="@android:drawable/ic_menu_help"
+                app:tint="#49454F" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Trợ lý AI"
-                android:textColor="@color/on_surface_variant"
+                android:textColor="#49454F"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -387,14 +327,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="@color/on_surface_variant" />
+                app:tint="#49454F" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Tài khoản"
-                android:textColor="@color/on_surface_variant"
+                android:textColor="#49454F"
                 android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
