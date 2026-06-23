@@ -8,6 +8,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin, Dược sĩ")]
     public class MedicineController : ControllerBase
     {
         private readonly DrugLookupAppContext _context;

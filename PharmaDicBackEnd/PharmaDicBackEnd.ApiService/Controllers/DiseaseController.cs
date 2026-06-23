@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PharmaDicBackEnd.ApiService.Models;
 using PharmaDicBackEnd.ApiService.DTOs;
-using PharmaDicBackEnd.ApiService.Models;
 
 namespace PharmaDicBackEnd.ApiService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Dược sĩ")]
     public class DiseaseController : ControllerBase
     {
         private readonly DrugLookupAppContext _context; // Đã đổi tên context theo đúng file tự sinh của bạn
