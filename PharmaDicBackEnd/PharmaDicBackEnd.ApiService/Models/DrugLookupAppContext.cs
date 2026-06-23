@@ -1,17 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using PharmaDicBackEnd.ApiService.Models;
 
-namespace PharmaDicBackEnd.ApiService.Data;
+namespace PharmaDicBackEnd.ApiService.Models;
 
-public partial class AppDbContext : DbContext
+public partial class DrugLookupAppContext : DbContext
 {
-    public AppDbContext()
+    public DrugLookupAppContext()
     {
     }
 
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public DrugLookupAppContext(DbContextOptions<DrugLookupAppContext> options)
         : base(options)
     {
     }
@@ -39,6 +38,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Symptom> Symptoms { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

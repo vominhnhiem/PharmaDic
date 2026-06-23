@@ -1,15 +1,22 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using PharmaDicBackEnd.ApiService.Data;
+using PharmaDicBackEnd.ApiService.Models;
 using System.Text;
+using PharmaDicBackEnd.ApiService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// AI Services
+builder.Services.AddHttpClient<GroqAiService>();
+builder.Services.AddScoped<MedicalChatbotService>();
+builder.Services.AddScoped<DrugInteractionAiService>();
+builder.Services.AddScoped<TreatmentRegimenAiService>();
 
 builder.Services.AddCors(options =>
 {
@@ -66,7 +73,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<DrugLookupAppContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddProblemDetails();
