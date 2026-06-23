@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PharmaDicBackEnd.ApiService.Data;
+using PharmaDicBackEnd.ApiService.Models;
 using PharmaDicBackEnd.ApiService.DTOs;
 
 namespace PharmaDicBackEnd.ApiService.Controllers
@@ -10,9 +10,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
     [ApiController]
     public class MedicineController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly DrugLookupAppContext _context;
 
-        public MedicineController(AppDbContext context)
+        public MedicineController(DrugLookupAppContext context)
         {
             _context = context;
         }

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using PharmaDicBackEnd.ApiService.Data;
+using PharmaDicBackEnd.ApiService.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,7 +66,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<DrugLookupAppContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddProblemDetails();
