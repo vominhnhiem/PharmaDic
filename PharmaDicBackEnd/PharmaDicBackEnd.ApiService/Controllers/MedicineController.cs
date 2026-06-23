@@ -16,7 +16,10 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         {
             _context = context;
         }
-        
+
+        /// <summary>
+        /// [PUBLIC] Tra cứu danh sách thuốc theo từ khóa
+        /// </summary>
         [HttpGet("search")]
         [AllowAnonymous]
         public IActionResult SearchMedicines([FromQuery] string keyword)
@@ -49,6 +52,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return Ok(medicines);
         }
 
+        /// <summary>
+        /// [PUBLIC] Lấy thông tin chi tiết của một loại thuốc theo ID
+        /// </summary>
         [HttpGet("{id}")]
         [AllowAnonymous]
         public IActionResult GetMedicineById(int id)
@@ -85,7 +91,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return Ok(medicine);
         }
 
-
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Thêm mới một loại thuốc vào hệ thống
+        /// </summary>
         [HttpPost]
         [Authorize(Roles = "Admin,Dược sĩ")]
         public IActionResult CreateMedicine([FromBody] CreateMedicineDto dto)
@@ -117,7 +125,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return CreatedAtAction(nameof(GetMedicineById), new { id = newMedicine.MedicineId }, new { message = "Thêm thuốc thành công!", id = newMedicine.MedicineId });
         }
 
-
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Cập nhật thông tin thuốc
+        /// </summary>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Dược sĩ")]
         public IActionResult UpdateMedicine(int id, [FromBody] UpdateMedicineDto dto)
@@ -161,6 +171,9 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             return Ok(new { message = "Cập nhật thông tin thuốc thành công!" });
         }
 
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Xóa vĩnh viễn một loại thuốc
+        /// </summary>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,Dược sĩ")]
         public IActionResult DeleteMedicine(int id)
