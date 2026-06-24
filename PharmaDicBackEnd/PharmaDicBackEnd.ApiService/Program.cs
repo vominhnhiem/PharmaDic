@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -71,6 +71,12 @@ builder.Services.AddDbContext<DrugLookupAppContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddProblemDetails();
+// AI Services
+builder.Services.AddHttpClient<GroqAiService>();
+
+builder.Services.AddScoped<MedicalChatbotService>();
+builder.Services.AddScoped<DrugInteractionAiService>();
+builder.Services.AddScoped<TreatmentRegimenAiService>();
 
 var app = builder.Build();
 
@@ -86,7 +92,7 @@ app.UseStaticFiles();
 
 app.UseCors("AllowMobileApp");
 app.UseAuthentication();
-app.UseAuthorization();        
+app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 

@@ -3,4 +3,5 @@
   <Project Path="PharmaDicBackEnd.AppHost/PharmaDicBackEnd.AppHost.csproj" />
   <Project Path="PharmaDicBackEnd.ServiceDefaults/PharmaDicBackEnd.ServiceDefaults.csproj" />
   <Project Path="PharmaDicBackEnd.Web/PharmaDicBackEnd.Web.csproj" />
+  <Project Path="VectorDbMigrator/VectorDbMigrator.csproj" />
 </Solution>
