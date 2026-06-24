@@ -196,5 +196,41 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                 return BadRequest(new { message = "Không thể xóa thuốc này vì nó đang liên kết với dữ liệu hoạt chất hoặc bệnh lý khác. Hãy xóa liên kết trước." });
             }
         }
+
+        /// <summary>
+        /// [ADMIN/DƯỢC SĨ] Gắn danh sách Hoạt chất (kèm hàm lượng) vào một loại thuốc
+        /// </summary>
+        [HttpPost("{id}/ingredients")]
+        [Authorize(Roles = "Admin,Dược sĩ")]
+        public IActionResult AssignIngredientsToMedicine(int id, [FromBody] List<MedicineIngredientInputDto> ingredientsDto)
+        {
+            var medicine = _context.Medicines
+                .Include(m => m.MedicineIngredients)
+                .FirstOrDefault(m => m.MedicineId == id);
+
+            if (medicine == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy thuốc với ID = {id}." });
+            }
+
+            _context.MedicineIngredients.RemoveRange(medicine.MedicineIngredients);
+
+            foreach (var item in ingredientsDto)
+            {
+                var ingredientExists = _context.Ingredients.Any(i => i.IngredientId == item.IngredientId);
+                if (ingredientExists)
+                {
+                    _context.MedicineIngredients.Add(new MedicineIngredient
+                    {
+                        MedicineId = id,
+                        IngredientId = item.IngredientId,
+                        Amount = item.Amount
+                    });
+                }
+            }
+
+            _context.SaveChanges();
+            return Ok(new { message = "Cập nhật danh sách hoạt chất và hàm lượng thành công!" });
+        }
     }
 }

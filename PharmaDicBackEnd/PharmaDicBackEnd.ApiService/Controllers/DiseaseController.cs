@@ -157,7 +157,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             }
         }
         /// <summary>
-        /// [ADMIN/DƯỢC SĨ] Gắn danh sách triệu chứng vào một bệnh lý cụ thể (Mapping Nhiều-Nhiều)
+        /// [ADMIN/DƯỢC SĨ] Gắn danh sách triệu chứng vào một bệnh lý cụ thể
         /// </summary>
         [HttpPost("{id}/symptoms")]
         public IActionResult AssignSymptomsToDisease(int id, [FromBody] List<int> symptomIds)
