@@ -1,0 +1,244 @@
+﻿@page "/users"
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<PageTitle>Quản lý người dùng - PharmaCheck</PageTitle>
+
+@* --- HEADER --- *@
+<div class="mb-6 flex justify-between items-end">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Quản lý người dùng</h2>
+        <p class="text-sm text-gray-500 mt-1">Phê duyệt và quản lý danh sách tài khoản trong hệ thống PharmaCheck.</p>
+    </div>
+    <div class="flex items-center bg-white border border-gray-200 px-4 py-2 rounded-md transition-shadow focus-within:shadow-sm focus-within:ring-1 focus-within:ring-[#00685f] w-72">
+        <span class="material-symbols-outlined text-gray-400 mr-2 text-[18px]">search</span>
+        <input @bind="SearchKeyword" @bind:event="oninput" @onkeyup="HandleSearch" class="bg-transparent border-none outline-none focus:ring-0 text-sm w-full" placeholder="Tìm kiếm theo email..." type="text">
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00685f]"></div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="bg-red-50 text-red-600 p-4 rounded-md text-sm font-medium border border-red-100 flex items-center gap-2 mb-6 shadow-sm">
+        <span class="material-symbols-outlined">error</span> @errorMessage
+    </div>
+}
+
+@if (pagedResult != null)
+{
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm mb-6">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-100 bg-gray-50/50">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Họ tên & Email</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Ngày đăng ký</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Vai trò</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @foreach (var user in pagedResult.Items)
+                    {
+                        <tr class="hover:bg-gray-50/80 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <img class="w-10 h-10 rounded-full border border-gray-200 shadow-sm" src="https://ui-avatars.com/api/?name=@(user.Email)&background=random" alt="Avatar">
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-800">@(string.IsNullOrEmpty(user.FullName) ? "Người dùng ẩn danh" : user.FullName)</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">@user.Email</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm text-gray-800 font-medium">@user.CreatedAt.ToString("dd/MM/yyyy")</p>
+                                <p class="text-xs text-gray-400 mt-0.5">@user.CreatedAt.ToString("HH:mm")</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if (user.Role == "Admin")
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-50 text-purple-600 border border-purple-100">Quản trị viên</span>
+                                }
+                                else if (user.Role == "Dược sĩ")
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#00685f]/10 text-[#00685f] border border-[#00685f]/20">Dược sĩ</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200">Khách</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    @* KÍCH HOẠT HÀM SỬA *@
+                                    <button @onclick="() => OpenEditModal(user)" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Chỉnh sửa">
+                                        <span class="material-symbols-outlined text-[20px]">edit</span>
+                                    </button>
+                                    <button @onclick="() => DeleteUser(user.UserId, user.Email)" class="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors" title="Xóa tài khoản">
+                                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@* --- MODAL CHỈNH SỬA TÀI KHOẢN ĐỘNG --- *@
+@if (isEditModalOpen && editingUser != null)
+{
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+        <div class="bg-white rounded-xl border border-gray-200 p-6 w-full max-w-md shadow-xl">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#00685f]">manage_accounts</span> Chỉnh sửa tài khoản
+            </h3>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Email (Không thể sửa)</label>
+                    <input type="text" disabled value="@editingUser.Email" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-400 outline-none" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Họ và tên *</label>
+                    <input type="text" @bind="editingUser.FullName" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-800 focus:ring-1 focus:ring-[#00685f] outline-none" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Quyền hạn hệ thống</label>
+                    <select @bind="editingUser.Role" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-800 focus:ring-1 focus:ring-[#00685f] outline-none cursor-pointer">
+                        <option value="Admin">Quản trị viên (Admin)</option>
+                        <option value="Dược sĩ">Dược sĩ</option>
+                        <option value="User">Người dùng thường (User)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
+                <button @onclick="CloseEditModal" class="px-4 py-2 border border-gray-200 text-gray-600 font-medium text-xs rounded hover:bg-gray-50 transition-colors">Hủy bỏ</button>
+                <button @onclick="SubmitEdit" class="px-4 py-2 bg-[#00685f] text-white font-bold text-xs rounded hover:bg-[#00524b] transition-colors shadow-sm">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    // Lưu ý định danh biến: Đổi tên trường từ Id sang UserId để đồng bộ 100% với DTO Response của Backend bạn vừa gửi
+    public class UserResponseDto
+    {
+        public int UserId { get; set; }
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Role { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class PagedResult<T> { public List<T> Items { get; set; } = new(); public int TotalItems { get; set; } public int CurrentPage { get; set; } public int PageSize { get; set; } public int TotalPages { get; set; } }
+
+    private PagedResult<UserResponseDto>? pagedResult;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    public string? SearchKeyword { get; set; }
+
+    // Biến điều khiển Modal Sửa
+    private bool isEditModalOpen = false;
+    private UserResponseDto? editingUser;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+            if (string.IsNullOrEmpty(token)) { NavigationManager.NavigateTo("/login"); return; }
+            var role = await JS.InvokeAsync<string>("localStorage.getItem", "userRole");
+            if (role != "Admin") { NavigationManager.NavigateTo("/"); return; }
+
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            await LoadData(currentPage);
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadData(int page)
+    {
+        isLoading = true;
+        errorMessage = null;
+        StateHasChanged();
+        try
+        {
+            string apiUrl = $"api/User?page={page}&pageSize={pageSize}";
+            if (!string.IsNullOrWhiteSpace(SearchKeyword)) apiUrl += $"&search={Uri.EscapeDataString(SearchKeyword.Trim())}";
+            pagedResult = await Http.GetFromJsonAsync<PagedResult<UserResponseDto>>(apiUrl);
+        }
+        catch (Exception ex) { errorMessage = $"Lỗi trích xuất CSDL: {ex.Message}"; }
+        finally { isLoading = false; StateHasChanged(); }
+    }
+
+    private void HandleSearch(KeyboardEventArgs e) { if (e.Key == "Enter") { currentPage = 1; _ = LoadData(currentPage); } }
+
+    // --- LOGIC XỬ LÝ MODAL SỬA ---
+    private void OpenEditModal(UserResponseDto user)
+    {
+        // Copy dữ liệu ra vùng nhớ tạm để lỡ hủy không bị thay đổi trực tiếp trên bảng
+        editingUser = new UserResponseDto { UserId = user.UserId, FullName = user.FullName, Email = user.Email, Role = user.Role };
+        isEditModalOpen = true;
+    }
+    private void CloseEditModal() { isEditModalOpen = false; editingUser = null; }
+
+    private async Task SubmitEdit()
+    {
+        if (editingUser == null) return;
+        isLoading = true;
+        isEditModalOpen = false;
+        StateHasChanged();
+
+        try
+        {
+            // Bắn trực tiếp lên API Update ở Backend
+            var response = await Http.PutAsJsonAsync($"api/User/{editingUser.UserId}", editingUser);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadData(currentPage); // Tải lại bảng sau khi cập nhật thành công
+            }
+            else
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi cập nhật tài khoản: {err}";
+            }
+        }
+        catch (Exception ex) { errorMessage = $"Lỗi kết nối mạng: {ex.Message}"; }
+        finally { isLoading = false; StateHasChanged(); }
+    }
+
+    private async Task DeleteUser(int id, string email)
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản '{email}' không?");
+        if (confirmed)
+        {
+            isLoading = true;
+            StateHasChanged();
+            try
+            {
+                var response = await Http.DeleteAsync($"api/User/{id}");
+                if (response.IsSuccessStatusCode) await LoadData(currentPage);
+                else
+                {
+                    var apiError = await response.Content.ReadAsStringAsync();
+                    errorMessage = $"Không thể xóa tài khoản. Hệ thống phản hồi: {apiError}";
+                }
+            }
+            catch (Exception ex) { errorMessage = $"Lỗi kết nối: {ex.Message}"; }
+            finally { isLoading = false; StateHasChanged(); }
+        }
+    }
+}

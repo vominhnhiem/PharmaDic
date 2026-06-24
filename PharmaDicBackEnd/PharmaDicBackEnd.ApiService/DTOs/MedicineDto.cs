@@ -8,5 +8,6 @@
         public string? DosageForm { get; set; }
         public string? Manufacturer { get; set; }
         public string? Uses { get; set; }
+
     }
 }

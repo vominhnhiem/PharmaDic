@@ -21,8 +21,13 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAllMedicines([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<PagedResult<MedicineDto>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
         {
+            var query = _context.Medicines.AsQueryable();
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(m => m.MedicineName.Contains(search));
+            }
             // 1. Đảm bảo tham số hợp lệ
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;

@@ -22,14 +22,26 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAllCategories([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllCategories([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
 
-            var totalItems = await _context.MedicineCategories.CountAsync();
+            // 1. CHỐT CHẶN: Khởi tạo đường ống truy vấn (Chưa chạm vào Database vội)
+            var query = _context.MedicineCategories.AsQueryable();
 
-            var categories = await _context.MedicineCategories
+            // 2. BỘ LỌC TÌM KIẾM: Nếu Frontend có gửi chữ lên, lập tức ép màng lọc vào
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                // Chuyển về chữ thường hết để tìm kiếm không phân biệt hoa/thường (tùy thuộc Collation của SQL)
+                query = query.Where(c => c.CategoryName.Contains(search.Trim()));
+            }
+
+            // 3. ĐẾM THẬT: Đếm số lượng bản ghi SAU KHI đã đi qua màng lọc
+            var totalItems = await query.CountAsync();
+
+            // 4. LẤY DỮ LIỆU: Bắt đầu phân trang và kéo dữ liệu thật từ Database lên
+            var categories = await query
                 .OrderBy(c => c.CategoryId)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -37,7 +49,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                 {
                     CategoryId = c.CategoryId,
                     CategoryName = c.CategoryName,
-                    Description = c.Description // Tùy chỉnh các thuộc tính này cho khớp với DTO của bạn
+                    Description = c.Description
                 })
                 .ToListAsync();
 

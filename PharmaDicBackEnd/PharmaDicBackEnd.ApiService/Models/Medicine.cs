@@ -46,4 +46,6 @@ public partial class Medicine
     public virtual ICollection<MedicineIngredient> MedicineIngredients { get; set; } = new List<MedicineIngredient>();
 
     public virtual ICollection<MedicineWarning> MedicineWarnings { get; set; } = new List<MedicineWarning>();
+
+
 }
