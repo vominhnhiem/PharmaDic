@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PharmaDicBackEnd.ApiService.Models;
-using PharmaDicBackEnd.ApiService.Services;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -88,6 +87,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles();
 
 app.UseCors("AllowMobileApp");
 app.UseAuthentication();
