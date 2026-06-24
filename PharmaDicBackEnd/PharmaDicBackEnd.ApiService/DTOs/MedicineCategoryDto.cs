@@ -6,6 +6,7 @@ namespace PharmaDicBackEnd.ApiService.DTOs
     {
         [Required(ErrorMessage = "Tên danh mục thuốc không được để trống.")]
         [StringLength(100, ErrorMessage = "Tên danh mục không được vượt quá 100 ký tự.")]
+        public int CategoryId { get; set; }
         public string CategoryName { get; set; } = null!;
 
         public string? Description { get; set; }

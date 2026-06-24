@@ -17,14 +17,25 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             _context = context;
         }
         /// <summary>
-        /// [PUBLIC] Lấy danh sách tất cả các loại thuốc
+        /// [PUBLIC] Lấy danh sách tất cả các loại thuốc (Có phân trang)
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult GetAllMedicines()
+        public async Task<IActionResult> GetAllMedicines([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var medicines = _context.Medicines
+            // 1. Đảm bảo tham số hợp lệ
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            // 2. Đếm tổng số lượng thuốc trong DB
+            var totalItems = await _context.Medicines.CountAsync();
+
+            // 3. Truy vấn cắt dữ liệu theo trang
+            var medicines = await _context.Medicines
                 .Include(m => m.Category)
+                .OrderBy(m => m.MedicineId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(m => new MedicineDto
                 {
                     MedicineId = m.MedicineId,
@@ -34,15 +45,19 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                     Manufacturer = m.Manufacturer,
                     Uses = m.Uses
                 })
-                .OrderByDescending(m => m.MedicineId) // Sắp xếp thuốc mới nhất lên đầu
-                .ToList();
+                .ToListAsync();
 
-            if (!medicines.Any())
+            // 4. Đóng gói kết quả trả về
+            var result = new PagedResult<MedicineDto>
             {
-                return NotFound(new { message = "Hệ thống chưa có thuốc nào." });
-            }
+                Items = medicines,
+                TotalItems = totalItems,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+            };
 
-            return Ok(medicines);
+            return Ok(result);
         }
         /// <summary>
         /// [PUBLIC] Tra cứu danh sách thuốc theo từ khóa
