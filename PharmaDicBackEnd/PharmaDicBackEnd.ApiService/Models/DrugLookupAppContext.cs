@@ -39,7 +39,9 @@ public partial class DrugLookupAppContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    
+    public DbSet<AIChatHistory> AIChatHistories { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Disease>(entity =>
@@ -244,6 +246,33 @@ public partial class DrugLookupAppContext : DbContext
             entity.Property(e => e.Role)
                 .HasMaxLength(50)
                 .HasDefaultValue("Dược sĩ");
+        });
+
+        modelBuilder.Entity<AIChatHistory>(entity =>
+        {
+            entity.ToTable("AIChatHistories");
+
+            entity.HasKey(e => e.ChatId);
+
+            entity.Property(e => e.ChatId)
+                .HasColumnName("ChatID");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("UserID");
+
+            entity.Property(e => e.Question);
+
+            entity.Property(e => e.Answer);
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AIChatHistories_Users");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -2,6 +2,7 @@ namespace PharmaDicBackEnd.ApiService.DTOs;
 
 public class ChatRequest
 {
+    public int UserId { get; set; }
     public string Question { get; set; } = string.Empty;
 }
 
