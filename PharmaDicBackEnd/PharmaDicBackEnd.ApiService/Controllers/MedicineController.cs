@@ -32,20 +32,24 @@ namespace PharmaDicBackEnd.ApiService.Controllers
 
             // 3. Truy vấn cắt dữ liệu theo trang
             var medicines = await _context.Medicines
-                .Include(m => m.Category)
-                .OrderBy(m => m.MedicineId)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(m => new MedicineDto
-                {
-                    MedicineId = m.MedicineId,
-                    MedicineName = m.MedicineName,
-                    CategoryName = m.Category != null ? m.Category.CategoryName : "Chưa phân loại",
-                    DosageForm = m.DosageForm,
-                    Manufacturer = m.Manufacturer,
-                    Uses = m.Uses
-                })
-                .ToListAsync();
+       .Include(m => m.Category)
+       .OrderBy(m => m.MedicineId)
+       .Skip((page - 1) * pageSize)
+       .Take(pageSize)
+       .Select(m => new MedicineDto
+       {
+           MedicineId = m.MedicineId,
+           MedicineName = m.MedicineName,
+           CategoryName = m.Category != null ? m.Category.CategoryName : "Chưa phân loại",
+           DosageForm = m.DosageForm,
+           Manufacturer = m.Manufacturer,
+           Uses = m.Uses,
+
+           // THÊM 2 DÒNG NÀY ĐỂ LẤY DỮ LIỆU TỪ SQL
+           Dosage = m.Dosage,
+           Contraindications = m.Contraindications
+       })
+       .ToListAsync();
 
             // 4. Đóng gói kết quả trả về
             var result = new PagedResult<MedicineDto>
@@ -73,7 +77,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
 
             var medicines = _context.Medicines
                 .Include(m => m.Category)
-                .Where(m => m.MedicineName.Contains(keyword))
+                .Where(m => m.MedicineName.Contains(keyword) || (m.Uses != null && m.Uses.Contains(keyword)))
                 .Select(m => new MedicineDto
                 {
                     MedicineId = m.MedicineId,
@@ -81,15 +85,14 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                     CategoryName = m.Category != null ? m.Category.CategoryName : "Chưa phân loại",
                     DosageForm = m.DosageForm,
                     Manufacturer = m.Manufacturer,
-                    Uses = m.Uses
+                    Uses = m.Uses,
+
+                    // THÊM 2 DÒNG NÀY ĐỂ LẤY DỮ LIỆU TỪ SQL
+                    Dosage = m.Dosage,
+                    Contraindications = m.Contraindications
                 })
                 .Take(50)
                 .ToList();
-
-            if (!medicines.Any())
-            {
-                return NotFound(new { message = "Không tìm thấy loại thuốc nào phù hợp." });
-            }
 
             return Ok(medicines);
         }
