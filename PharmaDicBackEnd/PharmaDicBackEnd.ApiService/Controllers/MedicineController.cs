@@ -16,7 +16,34 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         {
             _context = context;
         }
+        /// <summary>
+        /// [PUBLIC] Lấy danh sách tất cả các loại thuốc
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GetAllMedicines()
+        {
+            var medicines = _context.Medicines
+                .Include(m => m.Category)
+                .Select(m => new MedicineDto
+                {
+                    MedicineId = m.MedicineId,
+                    MedicineName = m.MedicineName,
+                    CategoryName = m.Category != null ? m.Category.CategoryName : "Chưa phân loại",
+                    DosageForm = m.DosageForm,
+                    Manufacturer = m.Manufacturer,
+                    Uses = m.Uses
+                })
+                .OrderByDescending(m => m.MedicineId) // Sắp xếp thuốc mới nhất lên đầu
+                .ToList();
 
+            if (!medicines.Any())
+            {
+                return NotFound(new { message = "Hệ thống chưa có thuốc nào." });
+            }
+
+            return Ok(medicines);
+        }
         /// <summary>
         /// [PUBLIC] Tra cứu danh sách thuốc theo từ khóa
         /// </summary>
