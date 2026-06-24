@@ -1,100 +1,120 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="bg-background text-on-background min-h-screen">
-    @* --- SIDEBAR BANEL (BÊN TRÁI) --- *@
-    <aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface dark:bg-surface-container-low border-r border-border dark:border-outline-variant shadow-sm dark:shadow-none flex flex-col py-gutter space-y-stack-sm z-50">
-
-        @* Logo & Tên ứng dụng *@
+<div class="bg-background text-on-background min-h-screen flex">
+    @* --- SIDEBAR PANEL --- *@
+    <aside class="w-64 h-screen fixed left-0 top-0 bg-surface border-r border-border flex flex-col py-6 z-50">
         <div class="px-6 mb-8">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded bg-primary flex items-center justify-center">
                     <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">medical_services</span>
                 </div>
                 <div>
-                    <h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed-dim">PharmaCheck</h1>
-                    <p class="font-label-md text-label-md text-on-surface-variant">Admin Portal</p>
+                    <h1 class="font-headline-sm text-headline-sm font-bold text-primary">PharmaCheck</h1>
+                    <p class="font-label-md text-on-surface-variant">Admin Portal</p>
                 </div>
             </div>
         </div>
 
-        @* Hệ thống Menu Điều Hướng *@
-        <nav class="flex-1 space-y-1">
-            @* Menu 1: Tổng quan *@
-            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
-                     href="" Match="NavLinkMatch.All"
-                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+        <nav class="flex-1 space-y-1 flex flex-col">
+            <NavLink class="nav-item" href="/" Match="NavLinkMatch.All">
                 <span class="material-symbols-outlined">dashboard</span>
-                <span class="font-label-md text-label-md">Tổng quan</span>
+                <span>Tổng quan</span>
             </NavLink>
 
-            @* Menu 2: Quản lý thuốc *@
-            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
-                     href="medications"
-                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+            <NavLink class="nav-item" href="/medications">
                 <span class="material-symbols-outlined">medication</span>
-                <span class="font-label-md text-label-md">Quản lý thuốc</span>
+                <span>Quản lý thuốc</span>
             </NavLink>
 
-            @* Menu 3: Nhật ký triệu chứng *@
-            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
-                     href="symptoms"
-                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+            <NavLink class="nav-item" href="/categories">
+                <span class="material-symbols-outlined">category</span>
+                <span>Danh mục thuốc</span>
+            </NavLink>
+
+            <NavLink class="nav-item" href="/symptoms">
                 <span class="material-symbols-outlined">clinical_notes</span>
-                <span class="font-label-md text-label-md">Nhật ký triệu chứng</span>
+                <span>Nhật ký triệu chứng</span>
             </NavLink>
 
-            @* Menu 4: Người dùng *@
-            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
-                     href="users"
-                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+            <NavLink class="nav-item" href="/users">
                 <span class="material-symbols-outlined">group</span>
-                <span class="font-label-md text-label-md">Người dùng</span>
+                <span>Người dùng</span>
             </NavLink>
 
-            @* Menu 5: Cài đặt *@
-            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
-                     href="settings"
-                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
-                
-            </NavLink>
+            @* Bổ sung nút Đăng xuất đẩy xuống cuối Sidebar *@
+            <div class="mt-auto pt-4 border-t border-border px-4">
+                <button class="nav-item text-error hover:bg-error-container w-full text-left rounded-md transition-colors">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
         </nav>
     </aside>
 
-    @* --- TOP NAVBAR (THANH TRÊN) --- *@
-    <header class="fixed top-0 right-0 w-[calc(100%-260px)] h-16 z-40 bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-md border-b border-border dark:border-outline-variant shadow-sm flex justify-between items-center px-gutter">
-
-        @* Thanh tìm kiếm *@
-        <div class="flex items-center bg-surface-container-low px-4 py-2 rounded-lg w-96 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+    @* --- TOP NAVBAR --- *@
+    <header class="fixed top-0 right-0 left-64 h-16 z-40 bg-surface/80 backdrop-blur-md border-b border-border flex justify-between items-center px-8">
+        <div class="flex items-center bg-surface-container-low px-4 py-2 rounded-lg w-96 transition-shadow focus-within:shadow-sm focus-within:ring-1 focus-within:ring-primary">
             <span class="material-symbols-outlined text-on-surface-variant mr-2">search</span>
-            <input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-on-surface-variant/50" placeholder="Tìm kiếm thuốc, triệu chứng..." type="text">
+            <input class="bg-transparent border-none outline-none focus:ring-0 text-body-md w-full" placeholder="Tìm kiếm nhanh..." type="text">
         </div>
 
-        @* Thông tin Admin & Thông báo *@
-        <div class="flex items-center gap-6">
-            <div class="flex items-center gap-4 border-r border-border pr-6">
-                <button class="relative hover:text-primary transition-all">
-                    <span class="material-symbols-outlined">notifications</span>
-                    <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-                </button>
-                <button class="hover:text-primary transition-all">
-                    <span class="material-symbols-outlined">help</span>
-                </button>
+        <div class="flex items-center gap-4 cursor-pointer hover:bg-surface-container-low p-2 rounded-lg transition-colors">
+            <div class="text-right">
+                <p class="font-label-md font-bold text-primary">Admin User</p>
+                <p class="text-[10px] text-on-surface-variant uppercase">Hệ thống cấp cao</p>
             </div>
-
-            <div class="flex items-center gap-3">
-                <div class="text-right">
-                    <p class="font-label-md text-label-md font-bold text-primary">Admin User</p>
-                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Hệ thống cấp cao</p>
-                </div>
-                <img alt="Administrator Profile Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQ7Oix5oozDYin2K-JCkcPnjP04NMwtz14fYW9WvN-_Ke4arIM0cilRHAbqM3pqAHwmx1xxfnUfCrBtSRftbnvx_uryMPOomdtHd9-Va3Thn6xPmAE6dTHbwjmNFBt3Yuub_tLdDMaeivUGQbQGKY-KdgwPHP3T4zMYzuUQhuDrx-p4M9lUXVTFCyz8lPtIiHhBlcBgvWt8Rn4fbAaVLBCt-8ig5Oh78qK7G-MDQl0Ey4c-p6wmk0g5sgWGA4SceV1TEfu1udf2lU">
-            </div>
+            <img alt="Avatar" class="w-10 h-10 rounded-full border-2 border-primary/20" src="https://ui-avatars.com/api/?name=Admin&background=random">
         </div>
     </header>
 
-    @* --- MAIN CONTENT AREA (VÙNG ĐỔ DỮ LIỆU) --- *@
-    <main class="ml-[260px] pt-24 p-margin-page min-h-screen">
-        <div class="max-w-[1440px] mx-auto">
-            @Body
+    @* --- MAIN CONTENT --- *@
+    <main class="ml-64 pt-16 w-full min-h-screen bg-surface-container-lowest/30">
+        <div class="p-8 max-w-[1440px] mx-auto">
+            @* Bao bọc Body bằng ErrorBoundary để bắt lỗi giao diện từng component con *@
+            <ErrorBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="Exception">
+                    <div class="bg-error-container text-on-error-container p-6 rounded-lg shadow-sm border border-error/20">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-error text-2xl">error</span>
+                            <h3 class="text-lg font-bold">Đã xảy ra lỗi khi tải trang này</h3>
+                        </div>
+                        <p class="text-sm opacity-80 mb-4">Vui lòng tải lại trang hoặc liên hệ quản trị viên.</p>
+                        <details class="text-xs bg-white/50 p-4 rounded whitespace-pre-wrap font-mono">
+                            <summary class="cursor-pointer font-bold mb-2">Xem chi tiết lỗi</summary>
+                            @Exception.Message
+                        </details>
+                    </div>
+                </ErrorContent>
+            </ErrorBoundary>
         </div>
     </main>
 </div>
+
+<style>
+    /* Bạn có thể cắt đoạn CSS này và dán vào file MainLayout.razor.css để tận dụng CSS Isolation của Blazor */
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        color: var(--sys-on-surface-variant, #49454F);
+        transition: all 0.2s ease-in-out;
+        text-decoration: none;
+    }
+
+        .nav-item:hover {
+            background-color: var(--sys-surface-container, #F3EDF7);
+            color: var(--sys-on-surface, #1D1B20);
+        }
+
+        /* NavLink của Blazor sẽ tự động thêm class 'active' khi URL khớp */
+        .nav-item.active {
+            color: var(--sys-primary, #6750A4);
+            background-color: var(--sys-secondary-container, #E8DEF8);
+            border-right: 4px solid var(--sys-primary, #6750A4);
+            font-weight: 600;
+        }
+</style>

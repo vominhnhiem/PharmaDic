@@ -10,7 +10,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")] // Bảo mật tuyệt đối: Chỉ Admin tối cao mới được xem số liệu kinh doanh
+    //[Authorize(Roles = "Admin")] // Bảo mật tuyệt đối: Chỉ Admin tối cao mới được xem số liệu kinh doanh
     public class DashboardController : ControllerBase
     {
         private readonly DrugLookupAppContext _context;
