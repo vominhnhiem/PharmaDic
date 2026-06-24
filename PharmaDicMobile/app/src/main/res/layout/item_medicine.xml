@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/ivMedicine"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvMedicineName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Paracetamol 500mg"
+                    android:textColor="#004D40"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupTags"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    app:chipSpacingHorizontal="8dp">
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Action"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="Hạ sốt"
+                        android:textSize="11sp"
+                        app:chipBackgroundColor="#E0F2F1"
+                        app:chipCornerRadius="16dp"
+                        app:chipStrokeWidth="0dp" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Action"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="Giảm đau"
+                        android:textSize="11sp"
+                        app:chipBackgroundColor="#E0F2F1"
+                        app:chipCornerRadius="16dp"
+                        app:chipStrokeWidth="0dp" />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivMedicine"
+                android:layout_width="80dp"
+                android:layout_height="60dp"
+                android:layout_alignParentEnd="true"
+                android:scaleType="centerInside"
+                android:src="@mipmap/ic_launcher" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/ic_menu_recent_history"
+                app:tint="#49454F" />
+
+            <TextView
+                android:id="@+id/tvDosage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Liều dùng: 1 viên mỗi 4-6h"
+                android:textColor="#1D1B20"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/stat_notify_error"
+                app:tint="#B3261E" />
+
+            <TextView
+                android:id="@+id/tvContraindications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Chống chỉ định: Suy gan nặng"
+                android:textColor="#B3261E"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewDetail"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/view_detail"
+            android:textAllCaps="false"
+            android:textColor="#006A60"
+            app:cornerRadius="12dp"
+            app:strokeColor="#006A60" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

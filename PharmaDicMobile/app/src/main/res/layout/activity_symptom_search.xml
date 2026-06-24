@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA"
@@ -19,31 +20,16 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingEnd="16dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_menu_sort_by_size"
-                app:tint="#006A60" />
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
                 android:text="PharmaDic"
                 android:textColor="#006A60"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_popup_reminder"
-                app:tint="#006A60" />
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -64,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Nhập triệu chứng của bệnh nhân"
+                android:text="@string/symptom_search_title"
                 android:textColor="#1D1B20"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -73,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Hãy mô tả chi tiết để trợ lý AI hỗ trợ tìm kiếm thuốc chính xác hơn."
+                android:text="Nhập triệu chứng để tìm thuốc phù hợp trong danh mục của hệ thống."
                 android:textColor="#49454F"
                 android:textSize="14sp" />
 
@@ -89,7 +75,7 @@
                     android:layout_height="180dp"
                     android:background="@drawable/edit_text_bg"
                     android:gravity="top|start"
-                    android:hint="Mô tả triệu chứng... (ví dụ: Sốt cao, đau đầu, đau họng)"
+                    android:hint="@string/symptom_search_hint"
                     android:padding="16dp"
                     android:textColor="#1D1B20"
                     android:textSize="16sp" />
@@ -146,6 +132,7 @@
                 android:textStyle="bold" />
 
             <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupSuggestions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -262,7 +249,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/navHistory"
+            android:id="@+id/navProfile"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -274,14 +261,14 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_recent_history"
+                android:src="@android:drawable/ic_menu_myplaces"
                 app:tint="#49454F" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Lịch sử"
+                android:text="Tài khoản"
                 android:textColor="#49454F"
                 android:textSize="11sp" />
         </LinearLayout>

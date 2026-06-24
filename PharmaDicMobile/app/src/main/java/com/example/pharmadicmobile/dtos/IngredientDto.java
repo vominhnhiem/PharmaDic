@@ -1,7 +1,12 @@
 package com.example.pharmadicmobile.dtos;
 
+import com.google.gson.annotations.SerializedName;
+
 public class IngredientDto {
+    @SerializedName(value = "IngredientName", alternate = {"ingredientName"})
     private String ingredientName;
+    
+    @SerializedName(value = "Amount", alternate = {"amount"})
     private String amount;
 
     public IngredientDto() {}

@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">PharmaDicMobile</string>
+    <string name="search_title">Tra cứu danh mục thuốc</string>
+    <string name="search_subtitle">Tìm kiếm thuốc theo tên hoặc triệu chứng điều trị trong hệ thống.</string>
+    <string name="search_hint">Nhập từ khóa tìm kiếm...</string>
+    <string name="search_query_format">Kết quả cho: %1$s</string>
+    <string name="searching">Đang truy xuất dữ liệu...</string>
+    <string name="no_results">Không tìm thấy thuốc phù hợp.</string>
+    <string name="category_label">Nhóm: %1$s</string>
+    <string name="manufacturer_label">NSX: %1$s</string>
+    <string name="connection_error">Lỗi kết nối: %1$s</string>
+    <string name="login_success">Đăng nhập thành công!</string>
+    <string name="login_fail">Email hoặc mật khẩu không đúng</string>
+    <string name="fill_info">Vui lòng nhập đầy đủ thông tin</string>
+    <string name="btn_start_text">Bắt đầu →</string>
+    <string name="empty_symptoms">Vui lòng nhập triệu chứng</string>
+    <string name="symptom_search_title">Tra cứu theo triệu chứng</string>
+    <string name="symptom_search_hint">Mô tả triệu chứng của bạn (ví dụ: đau đầu, sốt...)</string>
+
+    <string name="symptom_result_title">Kết quả gợi ý thuốc</string>
+    <string name="based_on_symptoms">Dựa trên triệu chứng: %1$s</string>
+    <string name="dosage_label">Liều dùng: %1$s</string>
+    <string name="contraindication_label">Chống chỉ định: %1$s</string>
+    <string name="view_detail">Xem chi tiết</string>
+    <string name="ai_not_found_title">Không tìm thấy?</string>
+    <string name="ai_not_found_desc">Trao đổi với Trợ lý AI để nhận được tư vấn chi tiết hơn về tình trạng của bạn.</string>
+    <string name="ask_ai_button">Hỏi AI tư vấn thêm →</string>
+    <string name="disclaimer">* Lưu ý: Các gợi ý trên chỉ mang tính chất tham khảo. Vui lòng tham vấn ý kiến bác sĩ trước khi sử dụng.</string>
 </resources>
