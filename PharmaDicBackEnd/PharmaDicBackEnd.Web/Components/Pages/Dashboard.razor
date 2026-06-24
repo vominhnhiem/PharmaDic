@@ -2,6 +2,8 @@
 @page "/"
 @page "/dashboard"
 @inject HttpClient Http
+@inject IJSRuntime JS
+@rendermode InteractiveServer
 
 <PageTitle>Tổng quan - PharmaCheck</PageTitle>
 
@@ -31,7 +33,7 @@ else if (!string.IsNullOrEmpty(errorMessage))
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
         <strong class="font-bold">Cảnh báo hệ thống:</strong>
         <span class="block sm:inline"> @errorMessage</span>
-        <p class="text-xs mt-1 opacity-75">Gợi ý: Đảm bảo bạn đã thêm dấu // trước dòng [Authorize] tại DashboardController phía Backend.</p>
+        <p class="text-xs mt-1 opacity-75">Gợi ý: Kiểm tra lại Token đăng nhập hoặc phân quyền tại DashboardController.</p>
     </div>
 }
 else if (overview != null)
@@ -182,20 +184,33 @@ else if (overview != null)
     private bool isLoading = true;
     private string errorMessage = "";
 
-    // SỰ THẬT KIẾN TRÚC: Gọi trực tiếp bất đồng bộ ngay khi khởi tạo cấu trúc Server
-    protected override async Task OnInitializedAsync()
+    // SỰ THẬT KIẾN TRÚC: Chuyển sang OnAfterRenderAsync để đảm bảo Blazor đã kết nối với trình duyệt và có thể dùng JSInterop
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadDashboardData();
+        if (firstRender)
+        {
+            await LoadDashboardData();
+        }
     }
 
     private async Task LoadDashboardData()
     {
         isLoading = true;
         errorMessage = "";
+        StateHasChanged(); // Cập nhật UI để hiện vòng xoay Loading
 
         try
         {
-            // Bắn trực tiếp request không Token, không gọi JavaScript Interop
+            // Lấy token từ LocalStorage
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+            // Đính kèm token vào request nếu có
+            if (!string.IsNullOrEmpty(token))
+            {
+                Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            // Gọi API lấy dữ liệu thống kê
             overview = await Http.GetFromJsonAsync<DashboardOverviewDto>("api/Dashboard/overview");
         }
         catch (Exception ex)
@@ -205,6 +220,7 @@ else if (overview != null)
         finally
         {
             isLoading = false;
+            StateHasChanged(); // Ép UI vẽ lại lần cuối khi đã có dữ liệu hoặc lỗi
         }
     }
 }

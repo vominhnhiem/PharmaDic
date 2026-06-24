@@ -1,8 +1,11 @@
 ﻿@page "/categories/edit/{Id:int}"
+@rendermode InteractiveServer
+
 @using PharmaDicBackEnd.ApiService.DTOs
+@using System.Net.Http.Headers
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
+@inject IJSRuntime JS
 
 @* --- HEADER & NÚT QUAY LẠI --- *@
 <div class="mb-6">
@@ -15,7 +18,7 @@
 @if (isLoading)
 {
     <p class="text-primary flex items-center gap-2">
-        <span class="material-symbols-outlined animate-spin">progress_activity</span> Đang tải thông tin...
+        <span class="material-symbols-outlined animate-spin">progress_activity</span> Đang tải thông tin danh mục...
     </p>
 }
 else if (updateCategory != null)
@@ -33,16 +36,19 @@ else if (updateCategory != null)
 
                 <div>
                     <label class="block text-sm font-semibold text-on-surface mb-1">Mô tả chi tiết</label>
-                    <InputTextArea @bind-Value="updateCategory.Description" rows="4" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" />
+                    <InputTextArea @bind-Value="updateCategory.Description" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all min-h-[120px]" />
                     <ValidationMessage For="@(() => updateCategory.Description)" class="text-error text-xs mt-1 font-medium" />
                 </div>
             </div>
 
             @if (!string.IsNullOrEmpty(submitError))
             {
-                <div class="bg-error-container text-error px-4 py-3 rounded-md text-sm mb-6 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-lg">warning</span>
-                    @submitError
+                <div class="bg-error-container text-error px-4 py-3 rounded-md text-sm mb-6 flex flex-col gap-1 border border-error/20">
+                    <div class="flex items-center gap-2 font-bold">
+                        <span class="material-symbols-outlined text-lg">warning</span>
+                        <span>Thông báo từ hệ thống:</span>
+                    </div>
+                    <span class="font-mono text-xs whitespace-pre-wrap pl-7">@submitError</span>
                 </div>
             }
 
@@ -64,21 +70,52 @@ else if (updateCategory != null)
         </EditForm>
     </div>
 }
+else
+{
+    <div class="bg-error-container text-error p-6 rounded-md text-sm max-w-2xl border border-error/20">
+        <div class="flex items-center gap-2 font-bold mb-2">
+            <span class="material-symbols-outlined">error</span>
+            <span>Không thể hiển thị form chỉnh sửa</span>
+        </div>
+        <p class="font-mono text-xs bg-white/50 p-3 rounded mb-4">@submitError</p>
+        <button @onclick="GoBack" class="px-4 py-2 bg-white border border-border text-on-surface-variant rounded-md hover:bg-surface-container transition-colors text-xs font-semibold">
+            Quay lại danh sách
+        </button>
+    </div>
+}
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
+    [Parameter] public int Id { get; set; }
 
     private MedicineCategoryInputDto? updateCategory;
     private bool isLoading = true;
     private bool isSubmitting = false;
     private string? submitError;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCategoryData();
+        }
+    }
+
+    private async Task LoadCategoryData()
     {
         try
         {
-            // Gọi API lấy thông tin chi tiết danh mục để đổ vào form
+            isLoading = true;
+            submitError = null;
+            StateHasChanged();
+
+            // SỬA CHUẨN: Lấy token trực tiếp bằng JS
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
             var detail = await Http.GetFromJsonAsync<MedicineCategoryInputDto>($"api/MedicineCategory/{Id}");
             if (detail != null)
             {
@@ -91,11 +128,12 @@ else if (updateCategory != null)
         }
         catch (Exception ex)
         {
-            submitError = "Không thể tải dữ liệu danh mục: " + ex.Message;
+            submitError = $"Lỗi tải dữ liệu. Chi tiết: {ex.Message}";
         }
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
     }
 
@@ -107,20 +145,29 @@ else if (updateCategory != null)
 
         try
         {
-            // Gọi API bằng phương thức PUT để cập nhật
+            // SỬA CHUẨN: Lấy token trực tiếp bằng JS (Đã xóa ProtectedLocalStore)
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
             var response = await Http.PutAsJsonAsync($"api/MedicineCategory/{Id}", updateCategory);
+
             if (response.IsSuccessStatusCode)
             {
                 NavigationManager.NavigateTo("/categories");
             }
             else
             {
-                submitError = $"Cập nhật thất bại (Mã lỗi: {response.StatusCode}). Vui lòng kiểm tra lại.";
+                var apiError = await response.Content.ReadAsStringAsync();
+                submitError = $"Mã lỗi API: {response.StatusCode}\nChi tiết: {apiError}";
             }
         }
         catch (Exception ex)
         {
-            submitError = $"Lỗi kết nối: {ex.Message}";
+            submitError = $"Lỗi kết nối mạng: {ex.Message}";
         }
         finally
         {

@@ -1,10 +1,13 @@
 ﻿@page "/categories/add"
-@using PharmaDicBackEnd.ApiService.DTOs
-@inject HttpClient Http
-@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
-@* --- HEADER & NÚT QUAY LẠI --- *@
+@using PharmaDicBackEnd.ApiService.DTOs
+@using System.Net.Http.Headers
+@* ĐÃ XÓA ProtectedBrowserStorage *@
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
 <div class="mb-6">
     <button @onclick="GoBack" class="text-primary hover:underline flex items-center gap-1 mb-2 text-sm font-medium transition-colors">
         <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại danh sách
@@ -13,10 +16,8 @@
     <p class="text-on-surface-variant text-sm mt-1">Tạo nhóm phân loại mới để tổ chức các loại thuốc trong hệ thống.</p>
 </div>
 
-@* --- FORM NHẬP LIỆU --- *@
 <div class="bg-white rounded-xl shadow-sm border border-border p-8 max-w-2xl">
     <EditForm Model="newCategory" OnValidSubmit="HandleSubmit">
-        @* Blazor sẽ tự động đọc [Required] và [StringLength] từ MedicineCategoryInputDto *@
         <DataAnnotationsValidator />
 
         <div class="space-y-6 mb-8">
@@ -28,7 +29,7 @@
 
             <div>
                 <label class="block text-sm font-semibold text-on-surface mb-1">Mô tả chi tiết</label>
-                <InputTextArea @bind-Value="newCategory.Description" rows="4" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Nhập ghi chú hoặc mô tả cho danh mục này (không bắt buộc)..." />
+                <InputTextArea @bind-Value="newCategory.Description" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all min-h-[120px]" placeholder="Nhập ghi chú hoặc mô tả cho danh mục này (không bắt buộc)..." />
                 <ValidationMessage For="@(() => newCategory.Description)" class="text-error text-xs mt-1 font-medium" />
             </div>
         </div>
@@ -62,9 +63,7 @@
 </div>
 
 @code {
-    // Sử dụng đúng DTO bạn đã cung cấp
     private MedicineCategoryInputDto newCategory = new MedicineCategoryInputDto();
-
     private bool isSubmitting = false;
     private string? submitError;
 
@@ -76,7 +75,14 @@
 
         try
         {
-            // Đảm bảo bạn đã có hàm [HttpPost] trong MedicineCategoryController
+            // SỰ THẬT: Trở về dùng JavaScript Interop đơn thuần để đọc Token như cũ
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
             var response = await Http.PostAsJsonAsync("api/MedicineCategory", newCategory);
 
             if (response.IsSuccessStatusCode)
@@ -85,7 +91,8 @@
             }
             else
             {
-                submitError = $"Không thể thêm danh mục (Mã lỗi: {response.StatusCode}). Vui lòng kiểm tra lại.";
+                var apiError = await response.Content.ReadAsStringAsync();
+                submitError = $"Không thể thêm danh mục (Mã lỗi: {response.StatusCode}). Chi tiết: {apiError}";
             }
         }
         catch (Exception ex)
