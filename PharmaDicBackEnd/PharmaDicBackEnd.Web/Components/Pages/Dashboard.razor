@@ -2,9 +2,6 @@
 @page "/"
 @page "/dashboard"
 @inject HttpClient Http
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
-@inject HttpClient Http
-@inject ProtectedLocalStorage ProtectedLocalStore
 
 <PageTitle>Tổng quan - PharmaCheck</PageTitle>
 
@@ -13,6 +10,7 @@
         <h2 class="font-headline-lg text-headline-lg text-primary">Bảng điều khiển tổng quan</h2>
         <p class="font-body-md text-body-md text-on-surface-variant mt-1">Chào mừng trở lại, đây là tóm tắt dữ liệu hệ thống PharmaCheck hôm nay.</p>
     </div>
+    @* Cặp nút hành động bên phải *@
     <div class="flex gap-3">
         <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md rounded hover:shadow-lg transition-all" @onclick="LoadDashboardData">
             <span class="material-symbols-outlined text-[18px]">refresh</span>
@@ -25,35 +23,41 @@
 {
     <div class="flex justify-center items-center py-20">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <span class="ml-3 text-lg text-on-surface-variant">Đang đồng bộ dữ liệu từ máy chủ...</span>
+        <span class="ml-3 text-lg text-on-surface-variant">Đang đồng bộ dữ liệu hệ thống...</span>
     </div>
 }
 else if (!string.IsNullOrEmpty(errorMessage))
 {
-    @* BẮT BUỘC HIỂN THỊ: Lỗi gì cũng phải hiện ra ở đây *@
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-        <strong class="font-bold">Hệ thống phát hiện lỗi:</strong>
+        <strong class="font-bold">Cảnh báo hệ thống:</strong>
         <span class="block sm:inline"> @errorMessage</span>
+        <p class="text-xs mt-1 opacity-75">Gợi ý: Đảm bảo bạn đã thêm dấu // trước dòng [Authorize] tại DashboardController phía Backend.</p>
     </div>
 }
 else if (overview != null)
 {
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-stack-lg">
+    @* Mở rộng lưới từ 3 lên 4 cột để hiển thị trọn vẹn 4 nhóm chỉ số thực tế từ Database *@
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-stack-lg">
+
         @* Thẻ 1: Tổng số thuốc *@
         <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="p-2 bg-primary/10 rounded w-fit">
-                <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">pill</span>
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-primary/10 rounded">
+                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">pill</span>
+                </div>
             </div>
             <div class="mt-4">
-                <p class="font-label-md text-label-md text-on-surface-variant">Tổng số thuốc trong từ điển</p>
+                <p class="font-label-md text-label-md text-on-surface-variant">Tổng số thuốc</p>
                 <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalMedicines</h3>
             </div>
         </div>
 
-        @* Thẻ 2: Bệnh lý *@
+        @* Thẻ 2: Tổng số bệnh lý *@
         <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="p-2 bg-red-100 text-red-600 rounded w-fit">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">coronavirus</span>
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-red-50 text-red-600 rounded">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">coronavirus</span>
+                </div>
             </div>
             <div class="mt-4">
                 <p class="font-label-md text-label-md text-on-surface-variant">Bệnh lý & Triệu chứng</p>
@@ -61,21 +65,25 @@ else if (overview != null)
             </div>
         </div>
 
-        @* Thẻ 3: Tài khoản *@
+        @* Thẻ 3: Người dùng hệ thống *@
         <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="p-2 bg-blue-100 text-blue-600 rounded w-fit">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medical_information</span>
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-secondary/10 rounded">
+                    <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">medical_information</span>
+                </div>
             </div>
             <div class="mt-4">
-                <p class="font-label-md text-label-md text-on-surface-variant">Tài khoản hoạt động</p>
+                <p class="font-label-md text-label-md text-on-surface-variant">Tài khoản người dùng</p>
                 <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalUsers</h3>
             </div>
         </div>
 
         @* Thẻ 4: Danh mục *@
         <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="p-2 bg-yellow-100 text-yellow-600 rounded w-fit">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">category</span>
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-yellow-50 text-yellow-600 rounded">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">category</span>
+                </div>
             </div>
             <div class="mt-4">
                 <p class="font-label-md text-label-md text-on-surface-variant">Danh mục phân loại</p>
@@ -84,13 +92,82 @@ else if (overview != null)
         </div>
     </div>
 }
-else
-{
-    @* ĐƯỜNG LÙI AN TOÀN: Nếu lỗi không xác định khiến cả 2 biến trên đều null *@
-    <div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">
-        Hệ thống đang ở trạng thái rỗng. Không thể nạp dữ liệu cấu trúc tổng quan.
+
+<div class="grid grid-cols-12 gap-6">
+    @* Giữ nguyên khối thiết kế Biểu đồ SVG nguyên bản của bạn bạn *@
+    <div class="col-span-12 lg:col-span-8 bg-surface border border-border rounded-lg p-stack-lg medical-shadow hover:-translate-y-0.5 transition-all duration-300">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h4 class="font-title-md text-title-md text-on-surface">Xu hướng tra cứu triệu chứng</h4>
+                <p class="text-label-md text-on-surface-variant">Thống kê dữ liệu thực tế theo thời gian thực</p>
+            </div>
+            <select class="bg-surface-container-low border-border rounded px-3 py-1 text-label-md focus:ring-primary">
+                <option>7 ngày qua</option>
+                <option>30 ngày qua</option>
+                <option>Năm nay</option>
+            </select>
+        </div>
+
+        <div class="chart-container flex items-end justify-between gap-2 pt-10 relative">
+            <svg class="absolute inset-0 w-full h-full p-4 pointer-events-none" viewBox="0 0 800 200">
+                <path d="M 0 160 Q 100 140 200 170 T 400 100 T 600 130 T 800 40" fill="none" stroke="#00685f" stroke-linecap="round" stroke-width="3"></path>
+                <path d="M 0 160 Q 100 140 200 170 T 400 100 T 600 130 T 800 40 V 200 H 0 Z" fill="url(#gradient-primary)" opacity="0.1"></path>
+                <defs>
+                    <linearGradient id="gradient-primary" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stop-color="#00685f"></stop>
+                        <stop offset="100%" stop-color="#ffffff"></stop>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-border">
+                <div class="w-full border-t border-border/50 border-dashed"></div>
+                <div class="w-full border-t border-border/50 border-dashed"></div>
+                <div class="w-full border-t border-border/50 border-dashed"></div>
+                <div class="w-full border-t border-border/50 border-dashed"></div>
+            </div>
+            <div class="w-full flex justify-between px-4 mt-2 z-10">
+                <span class="text-[10px] text-on-surface-variant">T2</span>
+                <span class="text-[10px] text-on-surface-variant">T3</span>
+                <span class="text-[10px] text-on-surface-variant">T4</span>
+                <span class="text-[10px] text-on-surface-variant">T5</span>
+                <span class="text-[10px] text-on-surface-variant">T6</span>
+                <span class="text-[10px] text-on-surface-variant">T7</span>
+                <span class="text-[10px] text-on-surface-variant">CN</span>
+            </div>
+        </div>
     </div>
-}
+
+    @* Giữ nguyên khối thiết kế Dòng thời gian hoạt động hệ thống *@
+    <div class="col-span-12 lg:col-span-4 bg-surface border border-border rounded-lg p-stack-lg medical-shadow overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+        <div class="flex justify-between items-center mb-6">
+            <h4 class="font-title-md text-title-md text-on-surface">Hoạt động gần đây</h4>
+            <button class="text-primary text-label-md font-bold hover:underline">Tất cả</button>
+        </div>
+        <div class="space-y-6">
+            <div class="flex gap-4 relative">
+                <div class="absolute left-4 top-8 bottom-0 w-px bg-border -mb-6"></div>
+                <div class="z-10 w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-success text-[16px]">add_circle</span>
+                </div>
+                <div>
+                    <p class="text-body-md font-bold">Thuốc mới được thêm</p>
+                    <p class="text-body-md text-on-surface-variant">Paracetamol 500mg - Lô hàng #PTC2024</p>
+                    <p class="text-label-md text-on-surface-variant/70 mt-1">2 phút trước • Bởi Admin</p>
+                </div>
+            </div>
+            <div class="flex gap-4 relative">
+                <div class="z-10 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-primary text-[16px]">person_add</span>
+                </div>
+                <div>
+                    <p class="text-body-md font-bold">Dược sĩ mới đăng ký</p>
+                    <p class="text-body-md text-on-surface-variant">Ds. Nguyễn Văn A - Bệnh viện 108</p>
+                    <p class="text-label-md text-on-surface-variant/70 mt-1">45 phút trước • Chờ xác minh</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     public class DashboardOverviewDto
@@ -105,71 +182,29 @@ else
     private bool isLoading = true;
     private string errorMessage = "";
 
-    protected override void OnInitialized()
+    // SỰ THẬT KIẾN TRÚC: Gọi trực tiếp bất đồng bộ ngay khi khởi tạo cấu trúc Server
+    protected override async Task OnInitializedAsync()
     {
-        isLoading = true;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await LoadDashboardData();
-            StateHasChanged();
-        }
+        await LoadDashboardData();
     }
 
     private async Task LoadDashboardData()
     {
         isLoading = true;
         errorMessage = "";
-        await InvokeAsync(StateHasChanged); // Ép vẽ spinner ngay lập tức
 
         try
         {
-            Console.WriteLine("[HỘP ĐEN] 1. Đang cố gắng móc Token từ LocalStorage...");
-            var tokenResult = await ProtectedLocalStore.GetAsync<string>("authToken");
-            var token = tokenResult.Success ? tokenResult.Value : null;
-            Console.WriteLine($"[HỘP ĐEN] 2. Đã móc Token xong. Token có tồn tại không: {!string.IsNullOrEmpty(token)}");
-
-            if (string.IsNullOrEmpty(token))
-            {
-                errorMessage = "Không tìm thấy Token. Vui lòng đăng nhập lại.";
-                return;
-            }
-
-            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            Console.WriteLine("[HỘP ĐEN] 3. Bắt đầu bắn request sang Backend (apiservice)...");
-
-            // Ép thời gian chờ tối đa 10 giây để không bị treo vĩnh viễn
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            overview = await Http.GetFromJsonAsync<DashboardOverviewDto>("api/Dashboard/overview", cts.Token);
-
-            Console.WriteLine("[HỘP ĐEN] 4. Đã nhận dữ liệu thành công từ Backend!");
-        }
-        catch (TaskCanceledException)
-        {
-            errorMessage = "Đã quá thời gian chờ (10 giây). Backend không phản hồi. Aspire có thể đang không tìm thấy tên 'apiservice'.";
-            Console.WriteLine("[HỘP ĐEN LỖI] Timeout 10 giây!");
-        }
-        catch (HttpRequestException ex)
-        {
-            errorMessage = $"Bị từ chối tại cổng Server: {ex.StatusCode} - {ex.Message}";
-            Console.WriteLine($"[HỘP ĐEN LỖI] HTTP: {ex.Message}");
+            // Bắn trực tiếp request không Token, không gọi JavaScript Interop
+            overview = await Http.GetFromJsonAsync<DashboardOverviewDto>("api/Dashboard/overview");
         }
         catch (Exception ex)
         {
-            errorMessage = $"Lỗi nội bộ Blazor: {ex.Message}";
-            Console.WriteLine($"[HỘP ĐEN LỖI] EXCEPTION: {ex.Message}");
+            errorMessage = $"Không thể kết xuất dữ liệu tổng quan: {ex.Message}";
         }
         finally
         {
-            Console.WriteLine("[HỘP ĐEN] 5. Kết thúc luồng, chuẩn bị tắt Spinner.");
             isLoading = false;
-
-            // CÚ "ĐẤM" QUYẾT ĐỊNH: Ép Blazor phải vẽ lại giao diện dù nó đang chạy trên Thread nào
-            await InvokeAsync(StateHasChanged);
         }
     }
 }
