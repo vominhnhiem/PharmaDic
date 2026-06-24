@@ -68,7 +68,7 @@ public class SearchResultsActivity extends AppCompatActivity {
         navAI = findViewById(R.id.navAI);
         navProfile = findViewById(R.id.navProfile);
 
-        findViewById(R.id.btnMenu).setOnClickListener(v -> finish());
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
     }
 
     private void setupRecyclerView() {

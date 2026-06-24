@@ -20,7 +20,7 @@ public class SymptomSearchActivity extends AppCompatActivity {
     private Button btnSearchSymptoms;
     private EditText etSymptoms;
     private ChipGroup chipGroupSuggestions;
-    private LinearLayout navHome, navAI, navHistory;
+    private LinearLayout navHome, navAI, navProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class SymptomSearchActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_symptom_search);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -46,7 +46,7 @@ public class SymptomSearchActivity extends AppCompatActivity {
         
         navHome = findViewById(R.id.navHome);
         navAI = findViewById(R.id.navAI);
-        navHistory = findViewById(R.id.navHistory);
+        navProfile = findViewById(R.id.navProfile);
     }
 
     private void setupClickListeners() {
@@ -69,8 +69,8 @@ public class SymptomSearchActivity extends AppCompatActivity {
             finish();
         });
         
-        if (navHistory != null) navHistory.setOnClickListener(v -> {
-            startActivity(new Intent(this, HistoryActivity.class));
+        if (navProfile != null) navProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
         });
     }
 
@@ -82,14 +82,12 @@ public class SymptomSearchActivity extends AppCompatActivity {
             if (child instanceof Chip) {
                 Chip chip = (Chip) child;
                 chip.setOnClickListener(v -> {
-                    String currentText = etSymptoms.getText().toString();
+                    String currentText = etSymptoms.getText().toString().trim();
                     String chipText = chip.getText().toString();
                     
                     if (currentText.isEmpty()) {
                         etSymptoms.setText(chipText);
-                    } else {
-                        etSymptoms.setText(getString(android.R.string.copy, currentText + ", " + chipText).replace("Copy", "")); 
-                        // Hoặc dùng StringBuilder/String.format cho chuẩn
+                    } else if (!currentText.contains(chipText)) {
                         etSymptoms.setText(currentText + ", " + chipText);
                     }
                     etSymptoms.setSelection(etSymptoms.getText().length());

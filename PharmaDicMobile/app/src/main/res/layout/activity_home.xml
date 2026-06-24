@@ -172,7 +172,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="THUỐC CẦN LƯU Ý HÔM NAY"
+                    android:text="THUỐC CẦN LƯU Ý"
                     android:textColor="#79747E"
                     android:textSize="11sp"
                     android:textStyle="bold" />

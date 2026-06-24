@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -121,22 +122,38 @@ public class ChatAIActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences("PharmaDic", Context.MODE_PRIVATE);
         String token = sharedPreferences.getString("token", "");
+        int userId = sharedPreferences.getInt("userId", 0);
         
+        // Log để kiểm tra userId trong Logcat
+        Log.d("CHAT_AI", "Gửi câu hỏi với UserId: " + userId);
+
         if (token.isEmpty()) {
             addMessage("Bạn cần đăng nhập để sử dụng tính năng này.", false);
             return;
         }
 
+        if (userId == 0) {
+            addMessage("Lỗi: Không tìm thấy thông tin người dùng (UserId = 0). Vui lòng đăng xuất và đăng nhập lại.", false);
+            return;
+        }
+
         String authHeader = "Bearer " + token;
 
-        ChatRequest request = new ChatRequest(question);
+        ChatRequest request = new ChatRequest(userId, question);
         RetrofitClient.getApiService().askAi(authHeader, request).enqueue(new Callback<AiResponse>() {
             @Override
             public void onResponse(@NonNull Call<AiResponse> call, @NonNull Response<AiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    addMessage(response.body().getAnswer(), false);
+                    AiResponse aiResponse = response.body();
+                    if (aiResponse.isError()) {
+                        addMessage("Lỗi hệ thống: " + aiResponse.getError(), false);
+                    } else if (aiResponse.getAnswer() != null && !aiResponse.getAnswer().isEmpty()) {
+                        addMessage(aiResponse.getAnswer(), false);
+                    } else {
+                        addMessage("AI không có phản hồi cho câu hỏi này.", false);
+                    }
                 } else {
-                    addMessage("Xin lỗi, tôi không thể xử lý câu hỏi lúc này.", false);
+                    addMessage("Xin lỗi, máy chủ không thể xử lý câu hỏi lúc này (Mã: " + response.code() + ").", false);
                 }
             }
 

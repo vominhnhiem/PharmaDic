@@ -19,14 +19,14 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingEnd="16dp">
+            android:paddingHorizontal="16dp">
 
             <ImageView
-                android:id="@+id/btnMenu"
+                android:id="@+id/btnBack"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_menu_sort_by_size"
+                android:src="@android:drawable/ic_menu_revert"
                 app:tint="#006A60" />
 
             <TextView
@@ -37,14 +37,6 @@
                 android:textColor="#006A60"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_popup_reminder"
-                app:tint="#006A60" />
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 

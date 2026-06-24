@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null) {
                     TokenResponse tokenResponse = response.body();
-                    saveAuthData(tokenResponse.getToken(), tokenResponse.getRole());
+                    saveAuthData(tokenResponse);
                     Toast.makeText(MainActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                     navigateToHome();
                 } else {
@@ -105,11 +105,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void saveAuthData(String token, String role) {
+    private void saveAuthData(TokenResponse response) {
         SharedPreferences sharedPreferences = getSharedPreferences("PharmaDic", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("token", token);
-        editor.putString("role", role);
+        editor.putString("token", response.getToken());
+        editor.putString("role", response.getRole());
+        editor.putInt("userId", response.getUserId());
+        editor.putString("fullName", response.getFullName());
+        editor.putString("email", response.getEmail());
         editor.apply();
     }
 
