@@ -1,6 +1,6 @@
 ﻿using PharmaDicBackEnd.Web;
 using PharmaDicBackEnd.Web.Components;
-using System.Net.Http; // Thêm thư viện này
+using System.Net.Http; // Bắt buộc có thư viện này
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +11,15 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
-builder.Services.AddScoped(sp => new HttpClient
+builder.Services.AddHttpClient("api", client =>
 {
-    BaseAddress = new Uri("https://localhost:5476/")
+    client.BaseAddress = new Uri("https+http://apiservice");
+});
+
+builder.Services.AddScoped(sp =>
+{
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+    return factory.CreateClient("api");
 });
 
 var app = builder.Build();

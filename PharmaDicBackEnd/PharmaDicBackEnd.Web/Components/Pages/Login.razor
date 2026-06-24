@@ -1,0 +1,109 @@
+﻿@page "/login"
+@* BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ NÚT BẤM HOẠT ĐỘNG TRONG BLAZOR 8 *@
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject HttpClient Http
+@inject ProtectedLocalStorage ProtectedLocalStore
+@inject NavigationManager NavigationManager
+
+<PageTitle>Đăng nhập Quản trị - PharmaCheck</PageTitle>
+
+@* Giao diện sử dụng 100% Tailwind CSS đồng bộ với dự án *@
+<div class="flex items-center justify-center min-h-screen bg-surface-container-low">
+    <div class="bg-surface border border-border rounded-lg shadow-lg p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <h3 class="font-headline-lg text-headline-lg text-primary">Đăng Nhập</h3>
+            <p class="text-on-surface-variant mt-2">Truy cập hệ thống quản trị PharmaCheck</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="bg-error-container text-error px-4 py-3 rounded mb-4 text-sm border border-error">
+                @errorMessage
+            </div>
+        }
+
+        <div class="mb-5">
+            <label class="block text-on-surface font-label-md mb-2">Email hệ thống</label>
+            <input type="email" class="w-full px-4 py-2 border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-surface" @bind="email" placeholder="admin@pharmacheck.com" />
+        </div>
+
+        <div class="mb-8">
+            <label class="block text-on-surface font-label-md mb-2">Mật khẩu</label>
+            <input type="password" class="w-full px-4 py-2 border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-surface" @bind="password" placeholder="••••••••" />
+        </div>
+
+        <button class="w-full bg-primary text-white py-3 rounded font-label-md hover:shadow-md hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2" @onclick="HandleLogin" disabled="@isLoading">
+            @if (isLoading)
+            {
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Đang xác thực...</span>
+            }
+            else
+            {
+                <span class="material-symbols-outlined text-[20px]">login</span>
+                <span>Đăng nhập hệ thống</span>
+            }
+        </button>
+    </div>
+</div>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    public class LoginResponse
+    {
+        public string Token { get; set; } = "";
+    }
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = "";
+        bool shouldNavigate = false; // Cờ hiệu an toàn
+
+        try
+        {
+            var loginData = new { Email = email, Password = password };
+            var response = await Http.PostAsJsonAsync("api/Auth/login", loginData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                if (result != null && !string.IsNullOrEmpty(result.Token))
+                {
+                    await ProtectedLocalStore.SetAsync("authToken", result.Token);
+                    shouldNavigate = true; // Đánh dấu thành công
+                }
+                else
+                {
+                    errorMessage = "Phản hồi từ Server bị rỗng hoặc không chứa Token.";
+                }
+            }
+            else
+            {
+                errorMessage = "Sai email hoặc mật khẩu. Vui lòng kiểm tra lại!";
+            }
+        }
+        catch (Exception ex)
+        {
+            // Bắt mọi lỗi từ rớt mạng, sai cổng Port, đến lỗi cú pháp
+            errorMessage = "Không thể kết nối đến Máy chủ API.";
+            Console.WriteLine($"Chi tiết lỗi: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+
+        // ĐƯA LỆNH CHUYỂN TRANG RA KHỎI TRY-CATCH ĐỂ TRÁNH CRASH BLAZOR
+        if (shouldNavigate)
+        {
+            NavigationManager.NavigateTo("/", true);
+        }
+    }
+}
