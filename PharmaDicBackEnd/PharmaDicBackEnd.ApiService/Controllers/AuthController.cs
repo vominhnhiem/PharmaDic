@@ -66,7 +66,10 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             {
                 message = "Đăng nhập thành công",
                 token = token,
-                role = user.Role
+                role = user.Role,
+                UserId = user.UserId,
+                FullName = user.FullName, // THÊM DÒNG NÀY
+                Email = user.Email        // THÊM DÒNG NÀY
             });
         }
 
