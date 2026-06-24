@@ -1,209 +1,296 @@
 ﻿@page "/medications"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
 
-@* --- TIÊU ĐỀ TRANG VÀ NÚT THÊM --- *@
-<div class="flex justify-between items-end mb-8">
-    <div>
-        <h2 class="text-3xl font-bold text-on-background">Danh mục thuốc</h2>
-        <p class="text-sm text-on-surface-variant mt-1">Quản lý và cập nhật thông tin kho dược phẩm hệ thống.</p>
-    </div>
-    <button class="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#005049] transition-all active:scale-95 shadow-sm">
-        <span class="material-symbols-outlined">add</span>
-        Thêm thuốc mới
-    </button>
-</div>
-
-@* --- KHỐI THỐNG KÊ (STATS CARDS) --- *@
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-surface p-6 rounded-xl border border-border medical-shadow">
-        <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest">Tổng thuốc</p>
-        <h3 class="text-3xl font-bold mt-2 text-on-background">1,284</h3>
-        <div class="mt-2 flex items-center gap-1 text-success text-xs font-medium">
-            <span class="material-symbols-outlined text-[16px]">trending_up</span>
-            <span>+12 tháng này</span>
+<div class="p-6">
+    @* --- TIÊU ĐỀ TRANG VÀ NÚT THÊM --- *@
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-on-background">Danh mục thuốc</h2>
+            <p class="text-sm text-on-surface-variant mt-1">Quản lý và cập nhật thông tin kho dược phẩm hệ thống.</p>
         </div>
-    </div>
-    <div class="bg-surface p-6 rounded-xl border border-border medical-shadow">
-        <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest">Sắp hết hàng</p>
-        <h3 class="text-3xl font-bold mt-2 text-orange-500">24</h3>
-        <div class="mt-2 flex items-center gap-1 text-on-surface-variant text-xs">
-            <span>Cần nhập thêm ngay</span>
-        </div>
-    </div>
-    <div class="bg-surface p-6 rounded-xl border border-border medical-shadow">
-        <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest">Hết hạn (30 ngày)</p>
-        <h3 class="text-3xl font-bold mt-2 text-red-600">8</h3>
-        <div class="mt-2 flex items-center gap-1 text-on-surface-variant text-xs">
-            <span>Trong kho lưu trữ</span>
-        </div>
-    </div>
-    <div class="bg-surface p-6 rounded-xl border border-border medical-shadow">
-        <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest">Nhà cung cấp</p>
-        <h3 class="text-3xl font-bold mt-2 text-tertiary">42</h3>
-        <div class="mt-2 flex items-center gap-1 text-on-surface-variant text-xs">
-            <span>Đối tác đã xác thực</span>
-        </div>
-    </div>
-</div>
-
-@* --- THANH ĐIỀU KHIỂN BỘ LỌC (CONTROL BAR) --- *@
-<div class="bg-surface p-4 rounded-t-xl border border-border border-b-0 flex flex-wrap items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-        <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">filter_list</span>
-            <select class="pl-10 pr-8 py-2 bg-gray-50 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none">
-                <option>Tất cả danh mục</option>
-                <option>Kháng sinh</option>
-                <option>Giảm đau</option>
-                <option>Vitamin & Thực phẩm chức năng</option>
-                <option>Tim mạch</option>
-            </select>
-        </div>
-        <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">sort</span>
-            <select class="pl-10 pr-8 py-2 bg-gray-50 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none">
-                <option>Mới nhất</option>
-                <option>Tên A-Z</option>
-                <option>Số lượng giảm dần</option>
-            </select>
-        </div>
-    </div>
-    <div class="flex items-center gap-2">
-        <button class="p-2 border border-border rounded-lg hover:bg-gray-100 transition-colors" title="Tải xuống">
-            <span class="material-symbols-outlined text-on-surface-variant">download</span>
-        </button>
-        <button class="p-2 border border-border rounded-lg hover:bg-gray-100 transition-colors" title="In dữ liệu">
-            <span class="material-symbols-outlined text-on-surface-variant">print</span>
+        <button @onclick="OpenAddModal" class="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#005049] transition-all active:scale-95 shadow-sm">
+            <span class="material-symbols-outlined">add</span>
+            Thêm thuốc mới
         </button>
     </div>
+
+    @* --- KHỐI THỐNG KÊ (STATS CARDS) --- *@
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Tổng thuốc</p>
+            <h3 class="text-3xl font-bold mt-2">@Medicines.Count</h3>
+            <div class="mt-2 text-green-600 text-xs font-medium">+12 tháng này</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Sắp hết hàng</p>
+            <h3 class="text-3xl font-bold mt-2 text-orange-500">24</h3>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Hết hạn (30 ngày)</p>
+            <h3 class="text-3xl font-bold mt-2 text-red-600">8</h3>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Nhà cung cấp</p>
+            <h3 class="text-3xl font-bold mt-2 text-blue-600">42</h3>
+        </div>
+    </div>
+
+    @* --- THANH ĐIỀU KHIỂN --- *@
+    <div class="bg-white p-4 rounded-t-xl border border-border border-b-0 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">filter_list</span>
+                <select class="pl-10 pr-8 py-2 bg-gray-50 border border-border rounded-lg text-sm appearance-none outline-none">
+                    <option>Tất cả danh mục</option>
+                    @foreach (var cat in Categories)
+                    {
+                        <option>@cat.CategoryName</option>
+                    }
+                </select>
+            </div>
+            <div class="relative">
+                <input type="text" placeholder="Tìm kiếm nhanh..." @bind="SearchTerm" @bind:event="oninput"
+                       class="pl-4 pr-4 py-2 bg-gray-50 border border-border rounded-lg text-sm outline-none w-64" />
+            </div>
+        </div>
+    </div>
+
+    @* --- BẢNG DỮ LIỆU --- *@
+    <div class="bg-white rounded-b-xl border border-border shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50 border-b border-border">
+                <tr>
+                    <th class="px-6 py-4 text-xs font-semibold uppercase">Tên thuốc</th>
+                    <th class="px-6 py-4 text-xs font-semibold uppercase">Danh mục</th>
+                    <th class="px-6 py-4 text-xs font-semibold uppercase">Nhà sản xuất</th>
+                    <th class="px-6 py-4 text-xs font-semibold uppercase text-center">Trạng thái</th>
+                    <th class="px-6 py-4 text-xs font-semibold uppercase text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+                @foreach (var m in FilteredMedicines)
+                {
+                    <tr class="hover:bg-gray-50/50 transition-all group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded bg-teal-50 flex items-center justify-center text-primary">
+                                    <span class="material-symbols-outlined">pill</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800">@m.MedicineName</p>
+                                    <p class="text-[11px] text-gray-400">@m.DosageForm • @m.Strength</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">@GetCategoryName(m.CategoryId)</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">@m.Manufacturer</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-green-600">Còn hàng</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button @onclick="() => EditMedicine(m)" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </button>
+                                <button @onclick="() => DeleteMedicine(m.MedicineId)" class="p-1.5 text-red-600 hover:bg-red-50 rounded">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
-@* --- BẢNG DỮ LIỆU CHÍNH (DATA TABLE) --- *@
-<div class="bg-surface rounded-b-xl border border-border medical-shadow overflow-hidden">
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-gray-50 border-b border-border">
-            <tr>
-                <th class="px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Tên thuốc</th>
-                <th class="px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Danh mục</th>
-                <th class="px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Nhà sản xuất</th>
-                <th class="px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-center">Trạng thái kho</th>
-                <th class="px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Cập nhật lần cuối</th>
-                <th class="px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-right">Thao tác</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-border">
-            @foreach (var drug in Drugs)
-            {
-                <tr class="hover:bg-gray-50/50 transition-all duration-200 hover:translate-x-1 group">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded flex items-center justify-center @drug.IconBgClass @drug.IconTextClass">
-                                <span class="material-symbols-outlined">@drug.IconName</span>
+@* --- MODAL THÊM/SỬA (BẢNG HIỆN LÊN) --- *@
+@if (ShowModal)
+{
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-modal">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="text-xl font-bold">@(CurrentMedicine.MedicineId == 0 ? "Thêm thuốc mới" : "Sửa thông tin thuốc")</h3>
+                <button @onclick="CloseModal" class="p-2 hover:bg-gray-200 rounded-full"><span class="material-symbols-outlined">close</span></button>
+            </div>
+
+            <EditForm Model="CurrentMedicine" OnValidSubmit="HandleSubmit" class="flex-1 overflow-y-auto p-8">
+                <DataAnnotationsValidator />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Tên thuốc *</label>
+                            <InputText @bind-Value="CurrentMedicine.MedicineName" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" />
+                            <ValidationMessage For="@(() => CurrentMedicine.MedicineName)" class="text-red-500 text-xs" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Danh mục</label>
+                            <InputSelect @bind-Value="CurrentMedicine.CategoryId" class="w-full p-2.5 border rounded-lg outline-none">
+                                <option value="">-- Chọn danh mục --</option>
+                                @foreach (var cat in Categories)
+                                {
+                                    <option value="@cat.CategoryId">@cat.CategoryName</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Dạng bào chế</label>
+                                <InputText @bind-Value="CurrentMedicine.DosageForm" class="w-full p-2.5 border rounded-lg" placeholder="Viên nén..." />
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-on-background">@drug.Name</p>
-                                <p class="text-xs text-on-surface-variant">SKU: @drug.Sku</p>
+                                <label class="block text-sm font-bold mb-1">Hàm lượng</label>
+                                <InputText @bind-Value="CurrentMedicine.Strength" class="w-full p-2.5 border rounded-lg" placeholder="500mg..." />
                             </div>
                         </div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="text-sm text-on-surface-variant">@drug.Category</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="text-sm text-on-surface-variant">@drug.Manufacturer</span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase @drug.StatusBgClass @drug.StatusTextClass">
-                            @drug.StatusText
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <p class="text-sm text-on-surface-variant">@drug.LastUpdated</p>
-                        <p class="text-xs text-gray-400">Bởi @drug.UpdatedBy</p>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                            <button class="p-1.5 text-primary hover:bg-primary/10 rounded transition-colors" title="Sửa">
-                                <span class="material-symbols-outlined text-[20px]">edit</span>
-                            </button>
-                            <button class="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors" title="Xóa">
-                                <span class="material-symbols-outlined text-[20px]">delete</span>
-                            </button>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Nhà sản xuất</label>
+                            <InputText @bind-Value="CurrentMedicine.Manufacturer" class="w-full p-2.5 border rounded-lg" />
                         </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </div>
 
-    @* --- PHÂN TRANG (PAGINATION) --- *@
-    <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-border">
-        <p class="text-xs text-on-surface-variant">Hiển thị 1 - 4 trên 1,284 thuốc</p>
-        <div class="flex items-center gap-1">
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-border text-on-surface-variant hover:bg-white transition-colors disabled:opacity-50" disabled>
-                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-            </button>
-            <button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white text-xs font-semibold">1</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-border text-on-surface-variant hover:bg-white transition-colors text-xs">2</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-border text-on-surface-variant hover:bg-white transition-colors text-xs">3</button>
-            <span class="px-2 text-on-surface-variant text-xs">...</span>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-border text-on-surface-variant hover:bg-white transition-colors text-xs">321</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-border text-on-surface-variant hover:bg-white transition-colors">
-                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-            </button>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Công dụng</label>
+                            <InputTextArea @bind-Value="CurrentMedicine.Uses" rows="3" class="w-full p-2.5 border rounded-lg outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Cách dùng & Liều lượng</label>
+                            <InputTextArea @bind-Value="CurrentMedicine.Dosage" rows="3" class="w-full p-2.5 border rounded-lg outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1 text-red-600">Chống chỉ định</label>
+                            <InputTextArea @bind-Value="CurrentMedicine.Contraindications" rows="2" class="w-full p-2.5 border border-red-200 rounded-lg outline-none" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t flex justify-end gap-3">
+                    <button type="button" @onclick="CloseModal" class="px-6 py-2 border rounded-lg font-semibold hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-8 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-[#005049] shadow-md transition-all">Lưu dữ liệu</button>
+                </div>
+            </EditForm>
         </div>
     </div>
-</div>
+}
 
-@* --- NÚT AI TRỢ GIÚP (STICKY AI FLOATING BUTTON) --- *@
-<div class="fixed bottom-8 right-8 group z-50">
-    <div class="absolute -top-12 right-0 bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-        Hỗ trợ phân tích tồn kho AI
-    </div>
-    <button class="w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+@* --- NÚT AI FLOATING --- *@
+<div class="fixed bottom-8 right-8 z-50">
+    <button class="w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-all">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
     </button>
 </div>
 
 @code {
-    // Khai báo cấu trúc dữ liệu mẫu cho danh sách thuốc
-    private List<DrugModel> Drugs = new()
+    // 1. DATA MODELS (Sử dụng cấu trúc bạn cung cấp)
+    public class MedicineFE
     {
-        new DrugModel {
-            Name = "Amoxicillin 500mg", Sku = "PH-AM-001", Category = "Kháng sinh", Manufacturer = "DHG Pharma",
-            StatusText = "Còn hàng (450)", LastUpdated = "14:20, 24/05/2024", UpdatedBy = "Admin", IconName = "pill",
-            IconBgClass = "bg-teal-50", IconTextClass = "text-primary", StatusBgClass = "bg-emerald-50", StatusTextClass = "text-success"
-        },
-        new DrugModel {
-            Name = "Paracetamol Extra", Sku = "PH-PA-052", Category = "Giảm đau", Manufacturer = "Sanofi Aventis",
-            StatusText = "Sắp hết (12)", LastUpdated = "09:15, 23/05/2024", UpdatedBy = "Hệ thống", IconName = "vaccines",
-            IconBgClass = "bg-blue-50", IconTextClass = "text-tertiary", StatusBgClass = "bg-amber-50", StatusTextClass = "text-orange-500"
-        },
-        new DrugModel {
-            Name = "Vitamin C Plus", Sku = "PH-VC-991", Category = "Thực phẩm chức năng", Manufacturer = "Blackmores",
-            StatusText = "Còn hàng (1,200)", LastUpdated = "16:45, 22/05/2024", UpdatedBy = "Admin", IconName = "medication_liquid",
-            IconBgClass = "bg-gray-100", IconTextClass = "text-on-surface-variant", StatusBgClass = "bg-emerald-50", StatusTextClass = "text-success"
-        },
-        new DrugModel {
-            Name = "Ciprofloxacin", Sku = "PH-CI-112", Category = "Kháng sinh", Manufacturer = "Pfizer Inc.",
-            StatusText = "Hết hàng (0)", LastUpdated = "10:00, 20/05/2024", UpdatedBy = "Hệ thống", IconName = "warning",
-            IconBgClass = "bg-red-50", IconTextClass = "text-red-500", StatusBgClass = "bg-red-100", StatusTextClass = "text-red-600"
-        }
+        public int MedicineId { get; set; }
+        [Required(ErrorMessage = "Tên thuốc không được để trống")]
+        public string MedicineName { get; set; } = "";
+        public int? CategoryId { get; set; }
+        public string? DosageForm { get; set; }
+        public string? Strength { get; set; }
+        public string? Manufacturer { get; set; }
+        public string? Uses { get; set; }
+        public string? Dosage { get; set; }
+        public string? Contraindications { get; set; }
+    }
+
+    public class CategoryFE
+    {
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } = "";
+    }
+
+    // 2. MOCK DATA (Dữ liệu giả để demo FE)
+    private List<MedicineFE> Medicines = new() {
+        new() { MedicineId = 1, MedicineName = "Amoxicillin", CategoryId = 1, DosageForm = "Viên nang", Strength = "500mg", Manufacturer = "DHG Pharma", Uses = "Diệt khuẩn" },
+        new() { MedicineId = 2, MedicineName = "Paracetamol", CategoryId = 2, DosageForm = "Viên nén", Strength = "500mg", Manufacturer = "Sanofi", Uses = "Giảm đau, hạ sốt" },
+        new() { MedicineId = 3, MedicineName = "Vitamin C", CategoryId = 3, DosageForm = "Viên sủi", Strength = "1000mg", Manufacturer = "Blackmores", Uses = "Tăng đề kháng" }
     };
 
-    // Định nghĩa class Model lưu trữ thông tin thuốc gọn nhẹ
-    public class DrugModel
+    private List<CategoryFE> Categories = new() {
+        new() { CategoryId = 1, CategoryName = "Kháng sinh" },
+        new() { CategoryId = 2, CategoryName = "Giảm đau" },
+        new() { CategoryId = 3, CategoryName = "Vitamin" }
+    };
+
+    // 3. LOGIC TRẠNG THÁI
+    private MedicineFE CurrentMedicine = new();
+    private bool ShowModal = false;
+    private string SearchTerm = "";
+
+    private IEnumerable<MedicineFE> FilteredMedicines => string.IsNullOrWhiteSpace(SearchTerm)
+        ? Medicines
+        : Medicines.Where(x => x.MedicineName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+
+    private string GetCategoryName(int? id) => Categories.FirstOrDefault(c => c.CategoryId == id)?.CategoryName ?? "N/A";
+
+    private void OpenAddModal()
     {
-        public string Name { get; set; } = string.Empty;
-        public string Sku { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public string Manufacturer { get; set; } = string.Empty;
-        public string StatusText { get; set; } = string.Empty;
-        public string LastUpdated { get; set; } = string.Empty;
-        public string UpdatedBy { get; set; } = string.Empty;
-        public string IconName { get; set; } = "pill";
-        public string IconBgClass { get; set; } = string.Empty;
-        public string IconTextClass { get; set; } = string.Empty;
-        public string StatusBgClass { get; set; } = string.Empty;
-        public string StatusTextClass { get; set; } = string.Empty;
+        CurrentMedicine = new MedicineFE();
+        ShowModal = true;
+    }
+
+    private void EditMedicine(MedicineFE m)
+    {
+        // Tạo bản sao để tránh sửa trực tiếp vào danh sách khi chưa lưu
+        CurrentMedicine = new MedicineFE
+        {
+            MedicineId = m.MedicineId,
+            MedicineName = m.MedicineName,
+            CategoryId = m.CategoryId,
+            DosageForm = m.DosageForm,
+            Strength = m.Strength,
+            Manufacturer = m.Manufacturer,
+            Uses = m.Uses,
+            Dosage = m.Dosage,
+            Contraindications = m.Contraindications
+        };
+        ShowModal = true;
+    }
+
+    private void CloseModal() => ShowModal = false;
+
+    private void HandleSubmit()
+    {
+        if (CurrentMedicine.MedicineId == 0)
+        {
+            // Logic Thêm
+            CurrentMedicine.MedicineId = Medicines.Any() ? Medicines.Max(x => x.MedicineId) + 1 : 1;
+            Medicines.Insert(0, CurrentMedicine);
+        }
+        else
+        {
+            // Logic Sửa
+            var index = Medicines.FindIndex(x => x.MedicineId == CurrentMedicine.MedicineId);
+            if (index != -1) Medicines[index] = CurrentMedicine;
+        }
+        CloseModal();
+    }
+
+    private void DeleteMedicine(int id)
+    {
+        Medicines.RemoveAll(x => x.MedicineId == id);
     }
 }
+
+<style>
+    .animate-modal {
+        animation: zoomIn 0.2s ease-out;
+    }
+
+    @@keyframes zoomIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
