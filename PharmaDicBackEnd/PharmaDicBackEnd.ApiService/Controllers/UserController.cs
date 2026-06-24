@@ -20,7 +20,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         }
 
         /// <summary>
-        /// [ADMIN] Lấy danh sách toàn bộ người dùng (Đã che giấu mật khẩu)
+        /// [ADMIN] Lấy danh sách toàn bộ người dùng
         /// </summary>
         [HttpGet]
         public IActionResult GetAllUsers()
@@ -95,7 +95,7 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         }
 
         /// <summary>
-        /// [ADMIN] Xóa tài khoản (Có kiểm tra chống tự sát và ràng buộc dữ liệu)
+        /// [ADMIN] Xóa tài khoản
         /// </summary>
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
