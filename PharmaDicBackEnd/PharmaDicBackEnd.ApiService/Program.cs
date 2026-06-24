@@ -101,5 +101,6 @@ app.MapControllers();
 
 app.MapGet("/", () => Results.Redirect("/swagger"))
    .ExcludeFromDescription();
-
+// Thêm dòng này NGAY TRƯỚC app.Run();
+app.Urls.Add("http://0.0.0.0:5476");
 app.Run();
