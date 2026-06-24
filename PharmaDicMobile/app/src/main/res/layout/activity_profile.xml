@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="PharmaCheck"
+                android:text="PharmaDic"
                 android:textColor="@color/primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -109,7 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="nguyenvana@pharmacheck.vn"
+                    android:text="nguyenvana@PharmaDic.vn"
                     android:textColor="@color/on_surface_variant"
                     android:textSize="14sp" />
 

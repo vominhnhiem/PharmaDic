@@ -12,26 +12,35 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private LinearLayout btnHeroSearch;
-    private LinearLayout btnHistory;
-    private LinearLayout btnAskAI;
-    private LinearLayout navSearch;
-    private LinearLayout navAI;
-    private LinearLayout navProfile;
+    private LinearLayout btnHeroSearch, btnHistory, btnAskAI;
+    private LinearLayout navSearch, navAI, navProfile;
     private CardView cardMedicine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Bật chế độ hiển thị tràn viền
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
+        // Xử lý khoảng cách với thanh trạng thái và điều hướng
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        // Ánh xạ các View từ Layout
+        initViews();
+
+        // Thiết lập các sự kiện click chuyển trang
+        setupClickListeners();
+    }
+
+    /**
+     * Khởi tạo các thành phần giao diện
+     */
+    private void initViews() {
         btnHeroSearch = findViewById(R.id.btnHeroSearch);
         btnHistory = findViewById(R.id.btnHistory);
         btnAskAI = findViewById(R.id.btnAskAI);
@@ -39,48 +48,29 @@ public class HomeActivity extends AppCompatActivity {
         navAI = findViewById(R.id.navAI);
         navProfile = findViewById(R.id.navProfile);
         cardMedicine = findViewById(R.id.cardMedicine);
+    }
 
-        // Chuyển sang trang tra cứu triệu chứng khi bấm vào nút chính
-        btnHeroSearch.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, SymptomSearchActivity.class);
-            startActivity(intent);
-        });
+    /**
+     * Cấu hình xử lý khi người dùng nhấn vào các nút
+     */
+    private void setupClickListeners() {
+        // Chuyển sang Tra cứu triệu chứng
+        btnHeroSearch.setOnClickListener(v -> startActivity(new Intent(this, SymptomSearchActivity.class)));
+        navSearch.setOnClickListener(v -> startActivity(new Intent(this, SymptomSearchActivity.class)));
 
-        // Chuyển sang trang lịch sử tra cứu
-        btnHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, HistoryActivity.class);
-            startActivity(intent);
-        });
+        // Xem lịch sử tra cứu
+        btnHistory.setOnClickListener(v -> startActivity(new Intent(this, HistoryActivity.class)));
 
-        // Chuyển sang trang tra cứu triệu chứng khi bấm vào mục "Tra cứu" ở Bottom Nav
-        navSearch.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, SymptomSearchActivity.class);
-            startActivity(intent);
-        });
+        // Mở trợ lý AI
+        btnAskAI.setOnClickListener(v -> startActivity(new Intent(this, ChatAIActivity.class)));
+        navAI.setOnClickListener(v -> startActivity(new Intent(this, ChatAIActivity.class)));
 
-        // Chuyển sang trang Trợ lý AI
-        btnAskAI.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, ChatAIActivity.class);
-            startActivity(intent);
-        });
+        // Vào trang cá nhân
+        navProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
 
-        navAI.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, ChatAIActivity.class);
-            startActivity(intent);
-        });
-
-        // Chuyển sang trang Tài khoản (Profile)
-        navProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
-            startActivity(intent);
-        });
-
-        // Chuyển sang trang Chi tiết thuốc khi bấm vào card thuốc
+        // Xem chi tiết một loại thuốc
         if (cardMedicine != null) {
-            cardMedicine.setOnClickListener(v -> {
-                Intent intent = new Intent(HomeActivity.this, MedicineDetailActivity.class);
-                startActivity(intent);
-            });
+            cardMedicine.setOnClickListener(v -> startActivity(new Intent(this, MedicineDetailActivity.class)));
         }
     }
 }
