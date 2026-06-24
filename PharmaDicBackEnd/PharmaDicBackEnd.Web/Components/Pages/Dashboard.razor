@@ -1,5 +1,7 @@
 ﻿@* Khai báo định tuyến trang này làm trang chủ mặc định *@
 @page "/"
+@page "/dashboard"
+@inject HttpClient Http
 
 <PageTitle>Tổng quan - PharmaCheck</PageTitle>
 
@@ -8,220 +10,134 @@
         <h2 class="font-headline-lg text-headline-lg text-primary">Bảng điều khiển tổng quan</h2>
         <p class="font-body-md text-body-md text-on-surface-variant mt-1">Chào mừng trở lại, đây là tóm tắt dữ liệu hệ thống PharmaCheck hôm nay.</p>
     </div>
-    @* Cặp nút hành động bên phải *@
     <div class="flex gap-3">
-   
         <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md rounded hover:shadow-lg transition-all">
-            <span class="material-symbols-outlined text-[18px]">add</span>
-            Thêm dữ liệu mới
+            <span class="material-symbols-outlined text-[18px]">refresh</span>
+            Làm mới dữ liệu
         </button>
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-stack-lg md:grid-cols-3">
-    
-    @* Thẻ 1: Tổng số thuốc *@
-    <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-        <div class="flex justify-between items-start">
-            <div class="p-2 bg-primary/10 rounded">
-                <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">pill</span>
+@if (isLoading)
+{
+    // Bẫy UX: Hiển thị trạng thái đang tải thay vì để trắng trang
+    <div class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <span class="ml-3 text-lg text-on-surface-variant">Đang đồng bộ dữ liệu từ máy chủ...</span>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    // Bẫy lỗi: Hiển thị lỗi nếu không gọi được API
+    <div class="bg-error-container text-error p-4 rounded-lg border border-error mb-6">
+        <strong>Lỗi kết nối API: </strong> @errorMessage
+    </div>
+}
+else if (overview != null)
+{
+    // =========================================================
+    // DÒNG MÁU DỮ LIỆU THẬT SẼ CHẢY VÀO 4 THẺ NÀY (Đã điều chỉnh HTML của bạn bạn để chứa 4 thẻ)
+    // =========================================================
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-stack-lg">
+
+        @* Thẻ 1: Tổng số thuốc *@
+        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-primary/10 rounded">
+                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">pill</span>
+                </div>
             </div>
-            <span class="text-success font-label-md flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">trending_up</span> +2.4%
-            </span>
+            <div class="mt-4">
+                <p class="font-label-md text-label-md text-on-surface-variant">Tổng số thuốc trong từ điển</p>
+                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalMedicines</h3>
+            </div>
         </div>
-        <div class="mt-4">
-            <p class="font-label-md text-label-md text-on-surface-variant">Tổng số thuốc</p>
-            <h3 class="font-headline-md text-headline-md mt-1">@TotalMedications</h3>
+
+        @* Thẻ 2: Bệnh lý *@
+        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-error/10 rounded">
+                    <span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">coronavirus</span>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="font-label-md text-label-md text-on-surface-variant">Bệnh lý & Triệu chứng</p>
+                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalDiseases</h3>
+            </div>
+        </div>
+
+        @* Thẻ 3: Tài khoản người dùng *@
+        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-secondary/10 rounded">
+                    <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">medical_information</span>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="font-label-md text-label-md text-on-surface-variant">Tài khoản hoạt động</p>
+                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalUsers</h3>
+            </div>
+        </div>
+
+        @* Thẻ 4: Danh mục *@
+        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div class="p-2 bg-warning/10 rounded">
+                    <span class="material-symbols-outlined text-warning" style="font-variation-settings: 'FILL' 1;">category</span>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="font-label-md text-label-md text-on-surface-variant">Danh mục phân loại</p>
+                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalCategories</h3>
+            </div>
         </div>
     </div>
+}
 
-    @* Thẻ 2: Lượt tra cứu hàng ngày *@
-    <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-        <div class="flex justify-between items-start">
-            <div class="p-2 bg-tertiary/10 rounded">
-                <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">search</span>
-            </div>
-            <span class="text-success font-label-md flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">trending_up</span> +15.8%
-            </span>
-        </div>
-        <div class="mt-4">
-            <p class="font-label-md text-label-md text-on-surface-variant">Lượt tra cứu hôm nay</p>
-            <h3 class="font-headline-md text-headline-md mt-1">@TodaySearches</h3>
-        </div>
-    </div>
-
-    @* Thẻ 3: Số lượng dược sĩ hoạt động *@
-    <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-        <div class="flex justify-between items-start">
-            <div class="p-2 bg-secondary/10 rounded">
-                <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">medical_information</span>
-            </div>
-            <span class="text-on-surface-variant font-label-md flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">horizontal_rule</span> 0%
-            </span>
-        </div>
-        <div class="mt-4">
-            <p class="font-label-md text-label-md text-on-surface-variant">Dược sĩ hoạt động</p>
-            <h3 class="font-headline-md text-headline-md mt-1">@ActivePharmacists</h3>
-        </div>
-    </div>
-</div>
-
+@* (Tạm thời giữ nguyên giao diện Biểu đồ SVG giả của bạn bạn ở đây để không làm vỡ Layout, chúng ta sẽ xử lý biểu đồ thật bằng thư viện JS ở task sau) *@
 <div class="grid grid-cols-12 gap-6">
-    
-    @* Khối bên trái (8 Cột): Biểu đồ xu hướng dịch tễ tra cứu *@
-    <div class="col-span-12 lg:col-span-8 bg-surface border border-border rounded-lg p-stack-lg medical-shadow hover:-translate-y-0.5 transition-all duration-300">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h4 class="font-title-md text-title-md text-on-surface">Xu hướng tra cứu triệu chứng</h4>
-                <p class="text-label-md text-on-surface-variant">Thống kê dữ liệu thực tế theo thời gian thực</p>
-            </div>
-            @* Bộ lọc thời gian *@
-            <select class="bg-surface-container-low border-border rounded px-3 py-1 text-label-md focus:ring-primary">
-                <option>7 ngày qua</option>
-                <option>30 ngày qua</option>
-                <option>Năm nay</option>
-            </select>
-        </div>
-        
-        @* Khung chứa biểu đồ vẽ bằng SVG nguyên bản *@
-        <div class="chart-container flex items-end justify-between gap-2 pt-10">
-            <svg class="absolute inset-0 w-full h-full p-4 pointer-events-none" viewBox="0 0 800 200">
-                @* Đường kẻ Line Đồ thị *@
-                <path d="M 0 160 Q 100 140 200 170 T 400 100 T 600 130 T 800 40" fill="none" stroke="#00685f" stroke-linecap="round" stroke-width="3"></path>
-                @* Đổ màu dải Gradient mờ phía dưới đường Line *@
-                <path d="M 0 160 Q 100 140 200 170 T 400 100 T 600 130 T 800 40 V 200 H 0 Z" fill="url(#gradient-primary)" opacity="0.1"></path>
-                <defs>
-                    <linearGradient id="gradient-primary" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stop-color="#00685f"></stop>
-                        <stop offset="100%" stop-color="#ffffff"></stop>
-                    </linearGradient>
-                </defs>
-            </svg>
-            @* Các đường kẻ ngang nét đứt định vị cao độ biểu đồ *@
-            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-border">
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-            </div>
-            @* Nhãn hiển thị các thứ trong tuần dưới chân đồ thị *@
-            <div class="w-full flex justify-between px-4 mt-2 z-10">
-                <span class="text-[10px] text-on-surface-variant">T2</span>
-                <span class="text-[10px] text-on-surface-variant">T3</span>
-                <span class="text-[10px] text-on-surface-variant">T4</span>
-                <span class="text-[10px] text-on-surface-variant">T5</span>
-                <span class="text-[10px] text-on-surface-variant">T6</span>
-                <span class="text-[10px] text-on-surface-variant">T7</span>
-                <span class="text-[10px] text-on-surface-variant">CN</span>
-            </div>
-        </div>
-    </div>
-
-    @* Khối bên phải (4 Cột): Dòng thời gian hoạt động hệ thống gần đây *@
-    <div class="col-span-12 lg:col-span-4 bg-surface border border-border rounded-lg p-stack-lg medical-shadow overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-        <div class="flex justify-between items-center mb-6">
-            <h4 class="font-title-md text-title-md text-on-surface">Hoạt động gần đây</h4>
-            <button class="text-primary text-label-md font-bold hover:underline">Tất cả</button>
-        </div>
-        <div class="space-y-6">
-            @* Sự kiện 1: Thêm thuốc *@
-            <div class="flex gap-4 relative">
-                <div class="absolute left-4 top-8 bottom-0 w-px bg-border -mb-6"></div>
-                <div class="z-10 w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-success text-[16px]">add_circle</span>
-                </div>
-                <div>
-                    <p class="text-body-md font-bold">Thuốc mới được thêm</p>
-                    <p class="text-body-md text-on-surface-variant">Paracetamol 500mg - Lô hàng #PTC2024</p>
-                    <p class="text-label-md text-on-surface-variant/70 mt-1">2 phút trước • Bởi Admin</p>
-                </div>
-            </div>
-            @* Sự kiện 2: Đăng ký của Dược sĩ *@
-            <div class="flex gap-4 relative">
-                <div class="absolute left-4 top-8 bottom-0 w-px bg-border -mb-6"></div>
-                <div class="z-10 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-primary text-[16px]">person_add</span>
-                </div>
-                <div>
-                    <p class="text-body-md font-bold">Dược sĩ mới đăng ký</p>
-                    <p class="text-body-md text-on-surface-variant">Ds. Nguyễn Văn A - Bệnh viện 108</p>
-                    <p class="text-label-md text-on-surface-variant/70 mt-1">45 phút trước • Chờ xác minh</p>
-                </div>
-            </div>
-            @* Sự kiện 3: Tối ưu AI *@
-            <div class="flex gap-4 relative">
-                <div class="absolute left-4 top-8 bottom-0 w-px bg-border -mb-6"></div>
-                <div class="z-10 w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-warning text-[16px]">edit_note</span>
-                </div>
-                <div>
-                    <p class="text-body-md font-bold">Cập nhật triệu chứng AI</p>
-                    <p class="text-body-md text-on-surface-variant">Tối ưu hóa mô hình chẩn đoán đau nửa đầu</p>
-                    <p class="text-label-md text-on-surface-variant/70 mt-1">2 giờ trước • Hệ thống</p>
-                </div>
-            </div>
-            @* Sự kiện 4: Hết hàng / Cảnh báo *@
-            <div class="flex gap-4">
-                <div class="z-10 w-8 h-8 rounded-full bg-error/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-error text-[16px]">report</span>
-                </div>
-                <div>
-                    <p class="text-body-md font-bold">Cảnh báo tồn kho</p>
-                    <p class="text-body-md text-on-surface-variant">Amoxicillin sắp hết hàng tại kho chính</p>
-                    <p class="text-label-md text-on-surface-variant/70 mt-1">5 giờ trước • Cấp bách</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        @* Thẻ phụ 1: Xác minh *@
-        <div class="bg-surface border border-border rounded-lg p-6 medical-shadow flex items-center gap-4 hover:-translate-y-0.5 transition-all duration-300">
-            <div class="w-12 h-12 rounded bg-tertiary-container/10 flex items-center justify-center text-tertiary">
-                <span class="material-symbols-outlined text-[28px]">verified_user</span>
-            </div>
-            <div>
-                <h5 class="font-title-md text-title-md">98% Đã xác minh</h5>
-                <p class="text-label-md text-on-surface-variant">Tỷ lệ dữ liệu thuốc chính xác</p>
-            </div>
-        </div>
-        @* Thẻ phụ 2: Tốc độ phản hồi AI *@
-        <div class="bg-surface border border-border rounded-lg p-6 medical-shadow flex items-center gap-4 hover:-translate-y-0.5 transition-all duration-300">
-            <div class="w-12 h-12 rounded bg-primary-container/10 flex items-center justify-center text-primary">
-                <span class="material-symbols-outlined text-[28px]">speed</span>
-            </div>
-            <div>
-                <h5 class="font-title-md text-title-md">0.4s Trung bình</h5>
-                <p class="text-label-md text-on-surface-variant">Tốc độ phản hồi AI hỗ trợ</p>
-            </div>
-        </div>
-        @* Thẻ phụ 3: Khiếu nại từ người dùng *@
-        <div class="bg-surface border border-border rounded-lg p-6 medical-shadow flex items-center gap-4 hover:-translate-y-0.5 transition-all duration-300">
-            <div class="w-12 h-12 rounded bg-error-container/10 flex items-center justify-center text-error">
-                <span class="material-symbols-outlined text-[28px]">warning</span>
-            </div>
-            <div>
-                <h5 class="font-title-md text-title-md">12 Khiếu nại</h5>
-                <p class="text-label-md text-on-surface-variant">Cần xử lý trong ngày hôm nay</p>
-            </div>
-        </div>
+    <div class="col-span-12 bg-surface border border-border rounded-lg p-stack-lg medical-shadow">
+        <p class="text-on-surface-variant text-center py-4">Khu vực biểu đồ (Đang chờ tích hợp Chart.js)</p>
     </div>
 </div>
 
 @code {
-    // =========================================================================
-    // KHU VỰC QUẢN LÝ BIẾN DỮ LIỆU ĐỘNG CHO TRANG DASHBOARD
-    // =========================================================================
-    private string TotalMedications { get; set; } = "12,840";
-    private string TodaySearches { get; set; } = "3,421";
-    private int ActivePharmacists { get; set; } = 156;
-
-    @* Hàm khởi chạy tự động của Blazor component *@
-    protected override void OnInitialized()
+    // Định nghĩa class nội bộ (hoặc tạo file dùng chung) để hứng JSON từ API
+    public class DashboardOverviewDto
     {
-        // Khi cần nạp từ Database thực tế, mày viết logic gán biến tại đây.
+        public int TotalMedicines { get; set; }
+        public int TotalDiseases { get; set; }
+        public int TotalUsers { get; set; }
+        public int TotalCategories { get; set; }
+    }
+
+    private DashboardOverviewDto? overview;
+    private bool isLoading = true;
+    private string errorMessage = "";
+
+    // Hàm vòng đời: Được gọi tự động khi Blazor load trang này
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        isLoading = true;
+        errorMessage = "";
+        try
+        {
+            // Bắn request lên Server API đã cấu hình ở Program.cs
+            overview = await Http.GetFromJsonAsync<DashboardOverviewDto>("api/Dashboard/overview");
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = "Không thể kết nối đến Máy chủ API. Vui lòng kiểm tra lại Backend.";
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 }

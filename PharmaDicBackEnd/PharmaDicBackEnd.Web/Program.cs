@@ -1,17 +1,20 @@
-using PharmaDicBackEnd.Web;
+﻿using PharmaDicBackEnd.Web;
 using PharmaDicBackEnd.Web.Components;
+using System.Net.Http; // Thêm thư viện này
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddOutputCache();
 
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:5476/")
+});
 
 var app = builder.Build();
 
