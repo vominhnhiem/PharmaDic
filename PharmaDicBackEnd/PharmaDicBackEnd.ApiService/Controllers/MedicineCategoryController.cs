@@ -54,6 +54,30 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         }
 
         /// <summary>
+        /// [PUBLIC] Lấy thông tin chi tiết của một danh mục theo ID
+        /// </summary>
+        [HttpGet("{id}")]
+        [AllowAnonymous]
+        public IActionResult GetCategoryById(int id)
+        {
+            var category = _context.MedicineCategories.FirstOrDefault(c => c.CategoryId == id);
+
+            if (category == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy danh mục với ID = {id}" });
+            }
+
+            var categoryDto = new MedicineCategoryInputDto
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName,
+                Description = category.Description
+            };
+
+            return Ok(categoryDto);
+        }
+
+        /// <summary>
         /// [ADMIN] Thêm mới một danh mục thuốc vào hệ thống
         /// </summary>
         [HttpPost]

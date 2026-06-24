@@ -1,0 +1,133 @@
+﻿@page "/categories/edit/{Id:int}"
+@using PharmaDicBackEnd.ApiService.DTOs
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+@* --- HEADER & NÚT QUAY LẠI --- *@
+<div class="mb-6">
+    <button @onclick="GoBack" class="text-primary hover:underline flex items-center gap-1 mb-2 text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại danh sách
+    </button>
+    <h2 class="text-2xl font-bold text-primary">Cập nhật Danh Mục</h2>
+</div>
+
+@if (isLoading)
+{
+    <p class="text-primary flex items-center gap-2">
+        <span class="material-symbols-outlined animate-spin">progress_activity</span> Đang tải thông tin...
+    </p>
+}
+else if (updateCategory != null)
+{
+    <div class="bg-white rounded-xl shadow-sm border border-border p-8 max-w-2xl">
+        <EditForm Model="updateCategory" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="space-y-6 mb-8">
+                <div>
+                    <label class="block text-sm font-semibold text-on-surface mb-1">Tên danh mục *</label>
+                    <InputText @bind-Value="updateCategory.CategoryName" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" />
+                    <ValidationMessage For="@(() => updateCategory.CategoryName)" class="text-error text-xs mt-1 font-medium" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-on-surface mb-1">Mô tả chi tiết</label>
+                    <InputTextArea @bind-Value="updateCategory.Description" rows="4" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" />
+                    <ValidationMessage For="@(() => updateCategory.Description)" class="text-error text-xs mt-1 font-medium" />
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(submitError))
+            {
+                <div class="bg-error-container text-error px-4 py-3 rounded-md text-sm mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">warning</span>
+                    @submitError
+                </div>
+            }
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-border">
+                <button type="button" @onclick="GoBack" class="px-5 py-2 border border-border text-on-surface-variant font-medium rounded-md hover:bg-surface-container transition-colors">Hủy bỏ</button>
+                <button type="submit" disabled="@isSubmitting" class="px-5 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2 transition-colors shadow-sm">
+                    @if (isSubmitting)
+                    {
+                        <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                        <span>Đang lưu...</span>
+                    }
+                    else
+                    {
+                        <span class="material-symbols-outlined text-sm">save</span>
+                        <span>Lưu thay đổi</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private MedicineCategoryInputDto? updateCategory;
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string? submitError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Gọi API lấy thông tin chi tiết danh mục để đổ vào form
+            var detail = await Http.GetFromJsonAsync<MedicineCategoryInputDto>($"api/MedicineCategory/{Id}");
+            if (detail != null)
+            {
+                updateCategory = new MedicineCategoryInputDto
+                {
+                    CategoryName = detail.CategoryName,
+                    Description = detail.Description
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            submitError = "Không thể tải dữ liệu danh mục: " + ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+        submitError = null;
+        StateHasChanged();
+
+        try
+        {
+            // Gọi API bằng phương thức PUT để cập nhật
+            var response = await Http.PutAsJsonAsync($"api/MedicineCategory/{Id}", updateCategory);
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/categories");
+            }
+            else
+            {
+                submitError = $"Cập nhật thất bại (Mã lỗi: {response.StatusCode}). Vui lòng kiểm tra lại.";
+            }
+        }
+        catch (Exception ex)
+        {
+            submitError = $"Lỗi kết nối: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack() => NavigationManager.NavigateTo("/categories");
+}
