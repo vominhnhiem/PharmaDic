@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using PharmaDicBackEnd.ApiService.Data;
+using PharmaDicBackEnd.ApiService.Models;
 using PharmaDicBackEnd.ApiService.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,10 +12,10 @@ namespace PharmaDicBackEnd.ApiService.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly DrugLookupAppContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthController(AppDbContext context, IConfiguration configuration)
+        public AuthController(DrugLookupAppContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
@@ -56,16 +56,22 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
-            // Nhét dữ liệu của Dược sĩ vào bên trong thân Token (Claims)
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Role, user.Role ?? "Người dùng") // Rất quan trọng cho TASK-114
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
             };
 
-            // Cấu hình thuật toán mã hóa
+            if (!string.IsNullOrEmpty(user.Role))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, user.Role));
+            }
+            else
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Dược sĩ"));
+            }
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),

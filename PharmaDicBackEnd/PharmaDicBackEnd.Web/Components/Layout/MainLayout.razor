@@ -1,23 +1,100 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="bg-background text-on-background min-h-screen">
+    @* --- SIDEBAR BANEL (BÊN TRÁI) --- *@
+    <aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface dark:bg-surface-container-low border-r border-border dark:border-outline-variant shadow-sm dark:shadow-none flex flex-col py-gutter space-y-stack-sm z-50">
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        @* Logo & Tên ứng dụng *@
+        <div class="px-6 mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded bg-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+                </div>
+                <div>
+                    <h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed-dim">PharmaCheck</h1>
+                    <p class="font-label-md text-label-md text-on-surface-variant">Admin Portal</p>
+                </div>
+            </div>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        @* Hệ thống Menu Điều Hướng *@
+        <nav class="flex-1 space-y-1">
+            @* Menu 1: Tổng quan *@
+            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
+                     href="" Match="NavLinkMatch.All"
+                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Tổng quan</span>
+            </NavLink>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+            @* Menu 2: Quản lý thuốc *@
+            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
+                     href="medications"
+                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+                <span class="material-symbols-outlined">medication</span>
+                <span class="font-label-md text-label-md">Quản lý thuốc</span>
+            </NavLink>
+
+            @* Menu 3: Nhật ký triệu chứng *@
+            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
+                     href="symptoms"
+                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+                <span class="material-symbols-outlined">clinical_notes</span>
+                <span class="font-label-md text-label-md">Nhật ký triệu chứng</span>
+            </NavLink>
+
+            @* Menu 4: Người dùng *@
+            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
+                     href="users"
+                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+                <span class="material-symbols-outlined">group</span>
+                <span class="font-label-md text-label-md">Người dùng</span>
+            </NavLink>
+
+            @* Menu 5: Cài đặt *@
+            <NavLink class="flex items-center gap-3 px-6 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200"
+                     href="settings"
+                     ActiveClass="text-primary dark:text-primary-fixed-dim bg-secondary-container/30 dark:bg-on-primary-fixed-variant/20 border-r-4 border-primary dark:border-primary-fixed-dim font-semibold">
+                
+            </NavLink>
+        </nav>
+    </aside>
+
+    @* --- TOP NAVBAR (THANH TRÊN) --- *@
+    <header class="fixed top-0 right-0 w-[calc(100%-260px)] h-16 z-40 bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-md border-b border-border dark:border-outline-variant shadow-sm flex justify-between items-center px-gutter">
+
+        @* Thanh tìm kiếm *@
+        <div class="flex items-center bg-surface-container-low px-4 py-2 rounded-lg w-96 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <span class="material-symbols-outlined text-on-surface-variant mr-2">search</span>
+            <input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-on-surface-variant/50" placeholder="Tìm kiếm thuốc, triệu chứng..." type="text">
+        </div>
+
+        @* Thông tin Admin & Thông báo *@
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 border-r border-border pr-6">
+                <button class="relative hover:text-primary transition-all">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+                </button>
+                <button class="hover:text-primary transition-all">
+                    <span class="material-symbols-outlined">help</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="font-label-md text-label-md font-bold text-primary">Admin User</p>
+                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Hệ thống cấp cao</p>
+                </div>
+                <img alt="Administrator Profile Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQ7Oix5oozDYin2K-JCkcPnjP04NMwtz14fYW9WvN-_Ke4arIM0cilRHAbqM3pqAHwmx1xxfnUfCrBtSRftbnvx_uryMPOomdtHd9-Va3Thn6xPmAE6dTHbwjmNFBt3Yuub_tLdDMaeivUGQbQGKY-KdgwPHP3T4zMYzuUQhuDrx-p4M9lUXVTFCyz8lPtIiHhBlcBgvWt8Rn4fbAaVLBCt-8ig5Oh78qK7G-MDQl0Ey4c-p6wmk0g5sgWGA4SceV1TEfu1udf2lU">
+            </div>
+        </div>
+    </header>
+
+    @* --- MAIN CONTENT AREA (VÙNG ĐỔ DỮ LIỆU) --- *@
+    <main class="ml-[260px] pt-24 p-margin-page min-h-screen">
+        <div class="max-w-[1440px] mx-auto">
+            @Body
+        </div>
+    </main>
 </div>
