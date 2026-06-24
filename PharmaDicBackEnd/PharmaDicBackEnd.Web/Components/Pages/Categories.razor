@@ -2,6 +2,7 @@
 @using PharmaDicBackEnd.ApiService.DTOs
 @inject HttpClient Http
 @rendermode InteractiveServer
+@inject IJSRuntime JS
 
 @* --- HEADER --- *@
 <div class="flex justify-between items-center mb-6">
@@ -9,10 +10,10 @@
         <h2 class="text-2xl font-bold text-primary">Danh mục thuốc</h2>
         <p class="text-on-surface-variant text-sm mt-1">Quản lý phân loại các nhóm thuốc trong hệ thống</p>
     </div>
-    <button class="bg-primary text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-primary/90 transition-shadow shadow-sm">
+    <a href="/categories/add" class="bg-primary text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-primary/90 transition-shadow shadow-sm decoration-none">
         <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 600;">add</span>
         Thêm danh mục mới
-    </button>
+    </a>
 </div>
 
 @* --- BẢNG DỮ LIỆU --- *@
@@ -68,10 +69,10 @@
                             <td class="px-6 py-4 text-on-surface-variant truncate max-w-md">@category.Description</td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1">
-                                    <button class="text-primary hover:bg-primary/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                                    <a href="/categories/edit/@category.CategoryId" class="text-primary hover:bg-primary/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                                         <span class="material-symbols-outlined text-[20px]">edit</span>
-                                    </button>
-                                    <button class="text-error hover:bg-error/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                                    </a>
+                                    <button type="button" @onclick="() => DeleteMedicineCategory(category.CategoryId, category.CategoryName)" class="text-error hover:bg-error/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                                         <span class="material-symbols-outlined text-[20px]">delete</span>
                                     </button>
                                 </div>
@@ -153,6 +154,31 @@
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task DeleteMedicineCategory(int id, string name)
+    {
+        // Hiển thị hộp thoại xác nhận
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xóa danh mục thuốc '{name}' khỏi hệ thống không?");
+        if (confirmed)
+        {
+            try
+            {
+                var response = await Http.DeleteAsync($"api/MedicineCategory/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadData(currentPage); // Tải lại trang hiện tại
+                }
+                else
+                {
+                    errorMessage = $"Không thể xóa. Máy chủ trả về lỗi: {response.StatusCode}";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Lỗi kết nối: {ex.Message}";
+            }
         }
     }
 }

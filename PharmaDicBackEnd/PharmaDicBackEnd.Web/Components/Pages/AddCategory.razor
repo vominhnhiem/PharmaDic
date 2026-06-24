@@ -1,0 +1,106 @@
+﻿@page "/categories/add"
+@using PharmaDicBackEnd.ApiService.DTOs
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+@* --- HEADER & NÚT QUAY LẠI --- *@
+<div class="mb-6">
+    <button @onclick="GoBack" class="text-primary hover:underline flex items-center gap-1 mb-2 text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Quay lại danh sách
+    </button>
+    <h2 class="text-2xl font-bold text-primary">Thêm Danh Mục Mới</h2>
+    <p class="text-on-surface-variant text-sm mt-1">Tạo nhóm phân loại mới để tổ chức các loại thuốc trong hệ thống.</p>
+</div>
+
+@* --- FORM NHẬP LIỆU --- *@
+<div class="bg-white rounded-xl shadow-sm border border-border p-8 max-w-2xl">
+    <EditForm Model="newCategory" OnValidSubmit="HandleSubmit">
+        @* Blazor sẽ tự động đọc [Required] và [StringLength] từ MedicineCategoryInputDto *@
+        <DataAnnotationsValidator />
+
+        <div class="space-y-6 mb-8">
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Tên danh mục *</label>
+                <InputText @bind-Value="newCategory.CategoryName" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="VD: Thuốc kháng sinh, Thực phẩm chức năng..." />
+                <ValidationMessage For="@(() => newCategory.CategoryName)" class="text-error text-xs mt-1 font-medium" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Mô tả chi tiết</label>
+                <InputTextArea @bind-Value="newCategory.Description" rows="4" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Nhập ghi chú hoặc mô tả cho danh mục này (không bắt buộc)..." />
+                <ValidationMessage For="@(() => newCategory.Description)" class="text-error text-xs mt-1 font-medium" />
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(submitError))
+        {
+            <div class="bg-error-container text-error px-4 py-3 rounded-md text-sm mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">warning</span>
+                @submitError
+            </div>
+        }
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
+            <button type="button" @onclick="GoBack" class="px-5 py-2 border border-border text-on-surface-variant font-medium rounded-md hover:bg-surface-container transition-colors">
+                Hủy bỏ
+            </button>
+            <button type="submit" disabled="@isSubmitting" class="px-5 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2 transition-colors shadow-sm">
+                @if (isSubmitting)
+                {
+                    <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                    <span>Đang lưu...</span>
+                }
+                else
+                {
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    <span>Lưu danh mục</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    // Sử dụng đúng DTO bạn đã cung cấp
+    private MedicineCategoryInputDto newCategory = new MedicineCategoryInputDto();
+
+    private bool isSubmitting = false;
+    private string? submitError;
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+        submitError = null;
+        StateHasChanged();
+
+        try
+        {
+            // Đảm bảo bạn đã có hàm [HttpPost] trong MedicineCategoryController
+            var response = await Http.PostAsJsonAsync("api/MedicineCategory", newCategory);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/categories");
+            }
+            else
+            {
+                submitError = $"Không thể thêm danh mục (Mã lỗi: {response.StatusCode}). Vui lòng kiểm tra lại.";
+            }
+        }
+        catch (Exception ex)
+        {
+            submitError = $"Lỗi kết nối: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }
+}
