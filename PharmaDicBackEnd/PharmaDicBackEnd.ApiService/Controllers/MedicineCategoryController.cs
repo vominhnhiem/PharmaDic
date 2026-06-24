@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PharmaDicBackEnd.ApiService.Models;
+using Microsoft.EntityFrameworkCore;
 using PharmaDicBackEnd.ApiService.DTOs;
+using PharmaDicBackEnd.ApiService.Models;
 
 namespace PharmaDicBackEnd.ApiService.Controllers
 {
@@ -17,21 +18,39 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         }
 
         /// <summary>
-        /// [PUBLIC] Lấy danh sách toàn bộ danh mục thuốc
+        /// [PUBLIC] Lấy danh sách danh mục thuốc (Có phân trang)
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult GetAllCategories()
+        public async Task<IActionResult> GetAllCategories([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var categories = _context.MedicineCategories
-                .Select(c => new
-                {
-                    c.CategoryId,
-                    c.CategoryName,
-                    c.Description
-                }).ToList();
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
 
-            return Ok(categories);
+            var totalItems = await _context.MedicineCategories.CountAsync();
+
+            var categories = await _context.MedicineCategories
+                .OrderBy(c => c.CategoryId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new MedicineCategoryInputDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description // Tùy chỉnh các thuộc tính này cho khớp với DTO của bạn
+                })
+                .ToListAsync();
+
+            var result = new PagedResult<MedicineCategoryInputDto>
+            {
+                Items = categories,
+                TotalItems = totalItems,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+            };
+
+            return Ok(result);
         }
 
         /// <summary>
