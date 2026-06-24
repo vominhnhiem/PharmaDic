@@ -161,6 +161,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:id="@+id/etEmail"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
@@ -183,6 +184,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:id="@+id/etPassword"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
@@ -247,6 +249,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:id="@+id/etRegisterName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
@@ -269,6 +272,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:id="@+id/etRegisterEmail"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
@@ -291,6 +295,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:id="@+id/etRegisterPassword"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
@@ -303,6 +308,7 @@
                                 android:textSize="14sp" />
 
                             <Button
+                                android:id="@+id/btnRegister"
                                 android:layout_width="match_parent"
                                 android:layout_height="56dp"
                                 android:layout_marginTop="24dp"

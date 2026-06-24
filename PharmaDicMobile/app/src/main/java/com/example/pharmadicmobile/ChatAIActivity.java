@@ -2,27 +2,50 @@ package com.example.pharmadicmobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.pharmadicmobile.adapters.ChatAdapter;
+import com.example.pharmadicmobile.api.RetrofitClient;
+import com.example.pharmadicmobile.dtos.AiResponse;
+import com.example.pharmadicmobile.dtos.ChatRequest;
+import com.example.pharmadicmobile.models.ChatMessage;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ChatAIActivity extends AppCompatActivity {
 
     private LinearLayout navHome, navSearch;
-    private ImageView btnBack;
+    private ImageView btnBack, btnSend;
+    private EditText edtMessage;
+    private RecyclerView chatRecyclerView;
+    private ChatAdapter chatAdapter;
+    private List<ChatMessage> chatMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Bật chế độ tràn viền
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_chat_ai);
 
-        // Xử lý khoảng cách hệ thống (Status bar/Navigation bar)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -30,38 +53,85 @@ public class ChatAIActivity extends AppCompatActivity {
         });
 
         initViews();
+        setupRecyclerView();
         setupClickListeners();
+
+        // Tin nhắn chào mừng mặc định
+        addMessage("Chào Dược sĩ, tôi có thể hỗ trợ gì cho bạn trong việc tra cứu tương tác thuốc hoặc liều dùng lâm sàng hôm nay?", false);
     }
 
-    /**
-     * Khởi tạo các thành phần giao diện
-     */
     private void initViews() {
         btnBack = findViewById(R.id.btnBack);
         navHome = findViewById(R.id.navHome);
         navSearch = findViewById(R.id.navSearch);
+        btnSend = findViewById(R.id.btnSend);
+        edtMessage = findViewById(R.id.edtMessage);
+        chatRecyclerView = findViewById(R.id.chatRecyclerView);
     }
 
-    /**
-     * Thiết lập các sự kiện click
-     */
+    private void setupRecyclerView() {
+        chatMessages = new ArrayList<>();
+        chatAdapter = new ChatAdapter(chatMessages);
+        chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        chatRecyclerView.setAdapter(chatAdapter);
+    }
+
     private void setupClickListeners() {
-        // Nút quay lại trang trước đó
         btnBack.setOnClickListener(v -> finish());
 
-        // Chuyển về trang chủ
         navHome.setOnClickListener(v -> {
             Intent intent = new Intent(this, HomeActivity.class);
-            // Xóa các Activity đè lên trang chủ nếu có
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
             finish();
         });
 
-        // Chuyển sang trang Tra cứu triệu chứng
         navSearch.setOnClickListener(v -> {
             startActivity(new Intent(this, SymptomSearchActivity.class));
             finish();
         });
+
+        btnSend.setOnClickListener(v -> {
+            String question = edtMessage.getText().toString().trim();
+            if (!question.isEmpty()) {
+                sendMessageToAI(question);
+            }
+        });
+    }
+
+    private void sendMessageToAI(String question) {
+        // 1. Hiển thị tin nhắn của User lên UI
+        addMessage(question, true);
+        edtMessage.setText("");
+
+        // 2. Gọi API gửi đến Backend
+        ChatRequest request = new ChatRequest(question);
+        
+        // Lưu ý: Trong thực tế bạn cần lấy Token sau khi Login thành công. 
+        // Ở đây mình tạm thời để trống hoặc bạn có thể truyền token test.
+        String token = "Bearer your_token_here"; 
+
+        RetrofitClient.getApiService().askAi(token, request).enqueue(new Callback<AiResponse>() {
+            @Override
+            public void onResponse(Call<AiResponse> call, Response<AiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    addMessage(response.body().getAnswer(), false);
+                } else {
+                    addMessage("Xin lỗi, đã có lỗi xảy ra khi kết nối với máy chủ.", false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AiResponse> call, Throwable t) {
+                addMessage("Không thể kết nối internet. Vui lòng kiểm tra lại.", false);
+            }
+        });
+    }
+
+    private void addMessage(String content, boolean isUser) {
+        String currentTime = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(new Date());
+        chatMessages.add(new ChatMessage(content, isUser, currentTime));
+        chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+        chatRecyclerView.scrollToPosition(chatMessages.size() - 1);
     }
 }
