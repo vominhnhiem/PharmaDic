@@ -1,7 +1,12 @@
 package com.example.pharmadicmobile.dtos;
 
+import com.google.gson.annotations.SerializedName;
+
 public class LoginRequest {
+    @SerializedName("Email")
     private String email;
+
+    @SerializedName("Password")
     private String password;
 
     public LoginRequest() {}

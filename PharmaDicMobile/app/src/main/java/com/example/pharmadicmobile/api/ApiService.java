@@ -11,8 +11,8 @@ public interface ApiService {
     @POST("api/Auth/login")
     Call<TokenResponse> login(@Body LoginRequest request);
 
-    // Backend không có register trong AuthController nhưng có trong UserController
-    // Nếu bạn muốn dùng register public, hãy đảm bảo Backend có endpoint này.
+    @POST("api/Auth/register")
+    Call<Void> register(@Body UserCreateDto dto);
     
     // --- USER (ADMIN ONLY) ---
     @GET("api/User")

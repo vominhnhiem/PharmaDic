@@ -97,30 +97,33 @@
                 </RelativeLayout>
 
                 <TextView
+                    android:id="@+id/tvProfileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Dược sĩ Nguyễn Văn A"
+                    android:text="Người dùng PharmaDic"
                     android:textColor="@color/on_background"
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvProfileEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="nguyenvana@PharmaDic.vn"
+                    android:text="email@example.com"
                     android:textColor="@color/on_surface_variant"
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/tvProfileRole"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_ai_suggestion_light"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
-                    android:text="Dược sĩ cao cấp"
+                    android:text="Thành viên"
                     android:textColor="@color/primary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -340,6 +343,7 @@
 
             <!-- Logout Button -->
             <Button
+                android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"

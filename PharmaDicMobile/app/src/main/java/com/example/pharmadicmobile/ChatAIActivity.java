@@ -1,13 +1,15 @@
 package com.example.pharmadicmobile;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -33,7 +35,7 @@ import retrofit2.Response;
 
 public class ChatAIActivity extends AppCompatActivity {
 
-    private LinearLayout navHome, navSearch;
+    private LinearLayout navHome, navSearch, navProfile, navAI;
     private ImageView btnBack, btnSend;
     private EditText edtMessage;
     private RecyclerView chatRecyclerView;
@@ -56,7 +58,6 @@ public class ChatAIActivity extends AppCompatActivity {
         setupRecyclerView();
         setupClickListeners();
 
-        // Tin nhắn chào mừng mặc định
         addMessage("Chào Dược sĩ, tôi có thể hỗ trợ gì cho bạn trong việc tra cứu tương tác thuốc hoặc liều dùng lâm sàng hôm nay?", false);
     }
 
@@ -64,6 +65,8 @@ public class ChatAIActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         navHome = findViewById(R.id.navHome);
         navSearch = findViewById(R.id.navSearch);
+        navAI = findViewById(R.id.navAI);
+        navProfile = findViewById(R.id.navProfile);
         btnSend = findViewById(R.id.btnSend);
         edtMessage = findViewById(R.id.edtMessage);
         chatRecyclerView = findViewById(R.id.chatRecyclerView);
@@ -77,53 +80,69 @@ public class ChatAIActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        btnBack.setOnClickListener(v -> finish());
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
-        navHome.setOnClickListener(v -> {
-            Intent intent = new Intent(this, HomeActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
-            finish();
-        });
+        if (navHome != null) {
+            navHome.setOnClickListener(v -> {
+                Intent intent = new Intent(this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
+            });
+        }
 
-        navSearch.setOnClickListener(v -> {
-            startActivity(new Intent(this, SymptomSearchActivity.class));
-            finish();
-        });
+        if (navSearch != null) {
+            navSearch.setOnClickListener(v -> {
+                startActivity(new Intent(this, SymptomSearchActivity.class));
+                finish();
+            });
+        }
 
-        btnSend.setOnClickListener(v -> {
-            String question = edtMessage.getText().toString().trim();
-            if (!question.isEmpty()) {
-                sendMessageToAI(question);
-            }
-        });
+        if (navProfile != null) {
+            navProfile.setOnClickListener(v -> {
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
+            });
+        }
+
+        if (btnSend != null) {
+            btnSend.setOnClickListener(v -> {
+                String question = edtMessage.getText().toString().trim();
+                if (!question.isEmpty()) {
+                    sendMessageToAI(question);
+                }
+            });
+        }
     }
 
     private void sendMessageToAI(String question) {
-        // 1. Hiển thị tin nhắn của User lên UI
         addMessage(question, true);
         edtMessage.setText("");
 
-        // 2. Gọi API gửi đến Backend
-        ChatRequest request = new ChatRequest(question);
+        SharedPreferences sharedPreferences = getSharedPreferences("PharmaDic", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("token", "");
         
-        // Lưu ý: Trong thực tế bạn cần lấy Token sau khi Login thành công. 
-        // Ở đây mình tạm thời để trống hoặc bạn có thể truyền token test.
-        String token = "Bearer your_token_here"; 
+        if (token.isEmpty()) {
+            addMessage("Bạn cần đăng nhập để sử dụng tính năng này.", false);
+            return;
+        }
 
-        RetrofitClient.getApiService().askAi(token, request).enqueue(new Callback<AiResponse>() {
+        String authHeader = "Bearer " + token;
+
+        ChatRequest request = new ChatRequest(question);
+        RetrofitClient.getApiService().askAi(authHeader, request).enqueue(new Callback<AiResponse>() {
             @Override
-            public void onResponse(Call<AiResponse> call, Response<AiResponse> response) {
+            public void onResponse(@NonNull Call<AiResponse> call, @NonNull Response<AiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     addMessage(response.body().getAnswer(), false);
                 } else {
-                    addMessage("Xin lỗi, đã có lỗi xảy ra khi kết nối với máy chủ.", false);
+                    addMessage("Xin lỗi, tôi không thể xử lý câu hỏi lúc này.", false);
                 }
             }
 
             @Override
-            public void onFailure(Call<AiResponse> call, Throwable t) {
-                addMessage("Không thể kết nối internet. Vui lòng kiểm tra lại.", false);
+            public void onFailure(@NonNull Call<AiResponse> call, @NonNull Throwable t) {
+                addMessage("Lỗi kết nối mạng: " + t.getMessage(), false);
             }
         });
     }
