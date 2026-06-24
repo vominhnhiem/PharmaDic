@@ -5,7 +5,6 @@ using PharmaDicBackEnd.ApiService.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
 namespace PharmaDicBackEnd.ApiService.Controllers
 {
     [Route("api/[controller]")]
@@ -32,7 +31,30 @@ namespace PharmaDicBackEnd.ApiService.Controllers
                 return Unauthorized(new { message = "Email hoặc mật khẩu không chính xác." });
             }
 
-            if (user.PasswordHash != request.Password)
+            // SỬA DÒNG NÀY: Dùng BCrypt.Verify để so sánh mật khẩu thô với mã băm trong DB
+            bool isPasswordValid = false;
+
+            try
+            {
+                // Kiểm tra xem mật khẩu dưới DB có đúng định dạng BCrypt không (luôn bắt đầu bằng "$2")
+                if (!string.IsNullOrEmpty(user.PasswordHash) && user.PasswordHash.StartsWith("$2"))
+                {
+                    // Nếu đúng chuẩn bảo mật, dùng code của Mobile Dev để xác thực
+                    isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+                }
+                else
+                {
+                    // NẾU LÀ TÀI KHOẢN CŨ: So sánh chữ thô bình thường để Web không bị sập
+                    isPasswordValid = (request.Password == user.PasswordHash);
+                }
+            }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                // Bẫy lỗi an toàn: Lỡ dính chuỗi rác, hệ thống chỉ báo sai Pass chứ không được phép Crash
+                isPasswordValid = false;
+            }
+
+            if (!isPasswordValid)
             {
                 return Unauthorized(new { message = "Email hoặc mật khẩu không chính xác." });
             }
@@ -40,7 +62,6 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             // 2. Nếu đúng mật khẩu, tiến hành tạo JWT Token
             var token = GenerateJwtToken(user);
 
-            // Trả về Token cho team Mobile
             return Ok(new
             {
                 message = "Đăng nhập thành công",

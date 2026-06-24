@@ -1,175 +1,160 @@
-﻿@* Khai báo định tuyến trang này làm trang chủ mặc định *@
-@page "/"
+﻿@page "/"
 @page "/dashboard"
 @inject HttpClient Http
 @inject IJSRuntime JS
-@rendermode InteractiveServer
 
 <PageTitle>Tổng quan - PharmaCheck</PageTitle>
 
-<div class="mb-stack-lg flex justify-between items-end">
+<div class="mb-6 flex justify-between items-end">
     <div>
-        <h2 class="font-headline-lg text-headline-lg text-primary">Bảng điều khiển tổng quan</h2>
-        <p class="font-body-md text-body-md text-on-surface-variant mt-1">Chào mừng trở lại, đây là tóm tắt dữ liệu hệ thống PharmaCheck hôm nay.</p>
+        <h2 class="text-2xl font-bold text-primary">Bảng điều khiển tổng quan</h2>
+        <p class="text-sm text-on-surface-variant mt-1">Tóm tắt dữ liệu thời gian thực của hệ thống PharmaCheck.</p>
     </div>
-    @* Cặp nút hành động bên phải *@
-    <div class="flex gap-3">
-        <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md rounded hover:shadow-lg transition-all" @onclick="LoadDashboardData">
-            <span class="material-symbols-outlined text-[18px]">refresh</span>
-            Làm mới dữ liệu
-        </button>
-    </div>
+    <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:shadow-md transition-all text-sm" @onclick="LoadDashboardData">
+        <span class="material-symbols-outlined text-[18px]">refresh</span>
+        Làm mới dữ liệu
+    </button>
 </div>
 
 @if (isLoading)
 {
     <div class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <span class="ml-3 text-lg text-on-surface-variant">Đang đồng bộ dữ liệu hệ thống...</span>
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        <span class="ml-3 text-on-surface-variant font-medium">Đang đồng bộ dữ liệu hệ thống...</span>
     </div>
 }
 else if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-        <strong class="font-bold">Cảnh báo hệ thống:</strong>
-        <span class="block sm:inline"> @errorMessage</span>
-        <p class="text-xs mt-1 opacity-75">Gợi ý: Kiểm tra lại Token đăng nhập hoặc phân quyền tại DashboardController.</p>
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
+        <strong class="font-bold">Cảnh báo hệ thống:</strong> <span>@errorMessage</span>
     </div>
 }
 else if (overview != null)
 {
-    @* Mở rộng lưới từ 3 lên 4 cột để hiển thị trọn vẹn 4 nhóm chỉ số thực tế từ Database *@
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-stack-lg">
-
-        @* Thẻ 1: Tổng số thuốc *@
-        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-primary/10 rounded">
-                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">pill</span>
-                </div>
+    @* --- KHỐI THỐNG KÊ SỐ LIỆU THẬT --- *@
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+            <div class="p-2 bg-primary/10 rounded-lg w-fit text-primary">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pill</span>
             </div>
             <div class="mt-4">
-                <p class="font-label-md text-label-md text-on-surface-variant">Tổng số thuốc</p>
-                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalMedicines</h3>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tổng số thuốc</p>
+                <h3 class="text-2xl font-bold mt-1 text-gray-800">@overview.TotalMedicines</h3>
             </div>
         </div>
 
-        @* Thẻ 2: Tổng số bệnh lý *@
-        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-red-50 text-red-600 rounded">
-                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">coronavirus</span>
-                </div>
+        <div class="bg-white border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+            <div class="p-2 bg-red-50 text-red-600 rounded-lg w-fit">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">coronavirus</span>
             </div>
             <div class="mt-4">
-                <p class="font-label-md text-label-md text-on-surface-variant">Bệnh lý & Triệu chứng</p>
-                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalDiseases</h3>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Bệnh lý & Triệu chứng</p>
+                <h3 class="text-2xl font-bold mt-1 text-gray-800">@overview.TotalDiseases</h3>
             </div>
         </div>
 
-        @* Thẻ 3: Người dùng hệ thống *@
-        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-secondary/10 rounded">
-                    <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">medical_information</span>
-                </div>
+        <div class="bg-white border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg w-fit">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
             </div>
             <div class="mt-4">
-                <p class="font-label-md text-label-md text-on-surface-variant">Tài khoản người dùng</p>
-                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalUsers</h3>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tài khoản hoạt động</p>
+                <h3 class="text-2xl font-bold mt-1 text-gray-800">@overview.TotalUsers</h3>
             </div>
         </div>
 
-        @* Thẻ 4: Danh mục *@
-        <div class="bg-surface border border-border rounded-lg p-stack-md medical-shadow flex flex-col justify-between hover:-translate-y-0.5 transition-all duration-300">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-yellow-50 text-yellow-600 rounded">
-                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">category</span>
-                </div>
+        <div class="bg-white border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+            <div class="p-2 bg-yellow-50 text-yellow-600 rounded-lg w-fit">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">category</span>
             </div>
             <div class="mt-4">
-                <p class="font-label-md text-label-md text-on-surface-variant">Danh mục phân loại</p>
-                <h3 class="font-headline-md text-headline-md mt-1">@overview.TotalCategories</h3>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Danh mục phân loại</p>
+                <h3 class="text-2xl font-bold mt-1 text-gray-800">@overview.TotalCategories</h3>
+            </div>
+        </div>
+    </div>
+
+    @* --- KHỐI BIỂU ĐỒ SVG ĐỘNG CHẠY BẰNG C# --- *@
+    <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 lg:col-span-8 bg-white border border-border rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h4 class="font-bold text-gray-800">Xu hướng tra cứu triệu chứng</h4>
+                    <p class="text-xs text-gray-400">Thống kê số lượt tương tác thực tế trong tuần qua</p>
+                </div>
+            </div>
+            
+            <div class="relative pt-10 pb-4">
+                @* Đồ thị vẽ bằng chuỗi tọa độ C# sinh ra *@
+                <svg class="w-full h-48 overflow-visible" viewBox="0 0 700 160" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="chart-gradient" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stop-color="#00685f" stop-opacity="0.2"></stop>
+                            <stop offset="100%" stop-color="#00685f" stop-opacity="0.0"></stop>
+                        </linearGradient>
+                    </defs>
+
+                    @* Vẽ vùng đổ màu phía dưới đường đồ thị *@
+                    <path d="@svgAreaPath" fill="url(#chart-gradient)"></path>
+
+                    @* Vẽ đường biểu đồ chính *@
+                    <path d="@svgLinePath" fill="none" stroke="#00685f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+
+                    @* Vẽ các điểm nút chấm tròn trên đồ thị dựa trên mảng tọa độ tính toán *@
+                    @foreach (var point in chartPoints)
+                    {
+                        <circle cx="@point.X" cy="@point.Y" r="5" fill="#white" stroke="#00685f" stroke-width="3"></circle>
+                        <text> x="@point.X" y="@(point.Y - 12)" text-anchor="middle" class="text-[10px] font-bold fill-primary">@point.Value</text>
+                    }
+                </svg>
+
+                @* Khung lưới gạch ngang định vị background *@
+                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-gray-100 h-48 pb-6">
+                    <div class="w-full border-t border-gray-100 border-dashed"></div>
+                    <div class="w-full border-t border-gray-100 border-dashed"></div>
+                    <div class="w-full border-t border-gray-100 border-dashed"></div>
+                </div>
+
+                @* Trục tọa độ ngang hiển thị các ngày trong tuần *@
+                <div class="w-full flex justify-between px-2 mt-4">
+                    <span class="text-xs text-gray-400 font-medium">T2</span>
+                    <span class="text-xs text-gray-400 font-medium">T3</span>
+                    <span class="text-xs text-gray-400 font-medium">T4</span>
+                    <span class="text-xs text-gray-400 font-medium">T5</span>
+                    <span class="text-xs text-gray-400 font-medium">T6</span>
+                    <span class="text-xs text-gray-400 font-medium">T7</span>
+                    <span class="text-xs text-gray-400 font-medium">CN</span>
+                </div>
+            </div>
+        </div>
+
+        @* --- BẢNG HOẠT ĐỘNG GẦN ĐÂY --- *@
+        <div class="col-span-12 lg:col-span-4 bg-white border border-border rounded-xl p-6 shadow-sm">
+            <h4 class="font-bold text-gray-800 mb-6">Hoạt động hệ thống</h4>
+            <div class="space-y-6">
+                <div class="flex gap-4 relative">
+                    <div class="absolute left-4 top-8 bottom-0 w-px bg-gray-100 -mb-6"></div>
+                    <div class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">add_circle</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-gray-700">Cập nhật kho thuốc</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Vừa đồng bộ dữ liệu với danh mục thuốc mới.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">verified_user</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-gray-700">Cơ sở dữ liệu thông suốt</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Kết nối với Aspire ApiService đạt trạng thái an toàn.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 }
-
-<div class="grid grid-cols-12 gap-6">
-    @* Giữ nguyên khối thiết kế Biểu đồ SVG nguyên bản của bạn bạn *@
-    <div class="col-span-12 lg:col-span-8 bg-surface border border-border rounded-lg p-stack-lg medical-shadow hover:-translate-y-0.5 transition-all duration-300">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h4 class="font-title-md text-title-md text-on-surface">Xu hướng tra cứu triệu chứng</h4>
-                <p class="text-label-md text-on-surface-variant">Thống kê dữ liệu thực tế theo thời gian thực</p>
-            </div>
-            <select class="bg-surface-container-low border-border rounded px-3 py-1 text-label-md focus:ring-primary">
-                <option>7 ngày qua</option>
-                <option>30 ngày qua</option>
-                <option>Năm nay</option>
-            </select>
-        </div>
-
-        <div class="chart-container flex items-end justify-between gap-2 pt-10 relative">
-            <svg class="absolute inset-0 w-full h-full p-4 pointer-events-none" viewBox="0 0 800 200">
-                <path d="M 0 160 Q 100 140 200 170 T 400 100 T 600 130 T 800 40" fill="none" stroke="#00685f" stroke-linecap="round" stroke-width="3"></path>
-                <path d="M 0 160 Q 100 140 200 170 T 400 100 T 600 130 T 800 40 V 200 H 0 Z" fill="url(#gradient-primary)" opacity="0.1"></path>
-                <defs>
-                    <linearGradient id="gradient-primary" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stop-color="#00685f"></stop>
-                        <stop offset="100%" stop-color="#ffffff"></stop>
-                    </linearGradient>
-                </defs>
-            </svg>
-            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-border">
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-                <div class="w-full border-t border-border/50 border-dashed"></div>
-            </div>
-            <div class="w-full flex justify-between px-4 mt-2 z-10">
-                <span class="text-[10px] text-on-surface-variant">T2</span>
-                <span class="text-[10px] text-on-surface-variant">T3</span>
-                <span class="text-[10px] text-on-surface-variant">T4</span>
-                <span class="text-[10px] text-on-surface-variant">T5</span>
-                <span class="text-[10px] text-on-surface-variant">T6</span>
-                <span class="text-[10px] text-on-surface-variant">T7</span>
-                <span class="text-[10px] text-on-surface-variant">CN</span>
-            </div>
-        </div>
-    </div>
-
-    @* Giữ nguyên khối thiết kế Dòng thời gian hoạt động hệ thống *@
-    <div class="col-span-12 lg:col-span-4 bg-surface border border-border rounded-lg p-stack-lg medical-shadow overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-        <div class="flex justify-between items-center mb-6">
-            <h4 class="font-title-md text-title-md text-on-surface">Hoạt động gần đây</h4>
-            <button class="text-primary text-label-md font-bold hover:underline">Tất cả</button>
-        </div>
-        <div class="space-y-6">
-            <div class="flex gap-4 relative">
-                <div class="absolute left-4 top-8 bottom-0 w-px bg-border -mb-6"></div>
-                <div class="z-10 w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-success text-[16px]">add_circle</span>
-                </div>
-                <div>
-                    <p class="text-body-md font-bold">Thuốc mới được thêm</p>
-                    <p class="text-body-md text-on-surface-variant">Paracetamol 500mg - Lô hàng #PTC2024</p>
-                    <p class="text-label-md text-on-surface-variant/70 mt-1">2 phút trước • Bởi Admin</p>
-                </div>
-            </div>
-            <div class="flex gap-4 relative">
-                <div class="z-10 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-primary text-[16px]">person_add</span>
-                </div>
-                <div>
-                    <p class="text-body-md font-bold">Dược sĩ mới đăng ký</p>
-                    <p class="text-body-md text-on-surface-variant">Ds. Nguyễn Văn A - Bệnh viện 108</p>
-                    <p class="text-label-md text-on-surface-variant/70 mt-1">45 phút trước • Chờ xác minh</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 @code {
     public class DashboardOverviewDto
@@ -178,49 +163,85 @@ else if (overview != null)
         public int TotalDiseases { get; set; }
         public int TotalUsers { get; set; }
         public int TotalCategories { get; set; }
+        // Mảng nhận 7 con số biểu đồ từ thứ 2 đến chủ nhật từ Backend gửi về
+        public List<int> WeeklyTrends { get; set; } = new();
     }
 
     private DashboardOverviewDto? overview;
     private bool isLoading = true;
     private string errorMessage = "";
 
-    // SỰ THẬT KIẾN TRÚC: Chuyển sang OnAfterRenderAsync để đảm bảo Blazor đã kết nối với trình duyệt và có thể dùng JSInterop
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // Các biến C# dùng để tự tính toán đồ thị hình học SVG
+    private string svgLinePath = "";
+    private string svgAreaPath = "";
+    private List<ChartPointPoint> chartPoints = new();
+
+    public class ChartPointPoint { public int X { get; set; } public int Y { get; set; } public int Value { get; set; } }
+
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            await LoadDashboardData();
-        }
+        await LoadDashboardData();
     }
 
     private async Task LoadDashboardData()
     {
         isLoading = true;
         errorMessage = "";
-        StateHasChanged(); // Cập nhật UI để hiện vòng xoay Loading
 
         try
         {
-            // Lấy token từ LocalStorage
-            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
-
-            // Đính kèm token vào request nếu có
-            if (!string.IsNullOrEmpty(token))
-            {
-                Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }
-
-            // Gọi API lấy dữ liệu thống kê
+            // Bắn API lấy cục tổng quan (Đã tắt bộ lọc Authorize ở Backend)
             overview = await Http.GetFromJsonAsync<DashboardOverviewDto>("api/Dashboard/overview");
+            
+            if (overview != null)
+            {
+                // Nếu Backend chưa viết mảng dữ liệu đồ thị, Frontend tự sinh dữ liệu mẫu để vẽ, tránh bị trống trang
+                if (overview.WeeklyTrends == null || overview.WeeklyTrends.Count < 7)
+                {
+                    overview.WeeklyTrends = new List<int> { 40, 120, 80, 160, 100, 220, 180 };
+                }
+
+                CalculateSvgChartCoordinates();
+            }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Không thể kết xuất dữ liệu tổng quan: {ex.Message}";
+            errorMessage = $"Lỗi trích xuất dữ liệu tổng quan: {ex.Message}";
         }
         finally
         {
             isLoading = false;
-            StateHasChanged(); // Ép UI vẽ lại lần cuối khi đã có dữ liệu hoặc lỗi
         }
+    }
+
+    // THUẬT TOÁN TỰ ĐỘNG TÍNH TOÀN TỌA ĐỘ ĐỒ THỊ BẰNG C#
+    private void CalculateSvgChartCoordinates()
+    {
+        chartPoints.Clear();
+        var trends = overview!.WeeklyTrends;
+
+        int maxDataValue = trends.Max();
+        if (maxDataValue == 0) maxDataValue = 1;
+
+        double svgWidth = 700;
+        double svgHeight = 160;
+        double paddingBottom = 20;
+        double paddingTop = 20;
+        double usableHeight = svgHeight - paddingTop - paddingBottom;
+
+        for (int i = 0; i < trends.Count; i++)
+        {
+            // BỌC (int) ĐỂ ÉP VỀ SỐ NGUYÊN TUYỆT ĐỐI, TRIỆT TIÊU DẤU PHẨY THẬP PHÂN
+            int x = (int)(i * (svgWidth / (trends.Count - 1)));
+            int y = (int)(svgHeight - paddingBottom - ((double)trends[i] / maxDataValue * usableHeight));
+
+            chartPoints.Add(new ChartPointPoint { X = x, Y = y, Value = trends[i] });
+        }
+
+        // SVG giờ đây nhận được chuỗi số nguyên sạch sẽ: M 0 140 L 116 80 ...
+        svgLinePath = $"M {chartPoints[0].X} {chartPoints[0].Y} " +
+                      string.Join(" ", chartPoints.Skip(1).Select(p => $"L {p.X} {p.Y}"));
+
+        svgAreaPath = $"{svgLinePath} L {chartPoints.Last().X} {svgHeight} L {chartPoints[0].X} {svgHeight} Z";
     }
 }

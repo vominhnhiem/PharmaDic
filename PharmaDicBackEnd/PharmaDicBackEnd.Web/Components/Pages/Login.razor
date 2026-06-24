@@ -59,69 +59,77 @@
 </div>
 
 @code {
-    // 1. Sử dụng đúng mô hình dữ liệu (DTO) của bạn
-    // Chú ý: Đảm bảo class LoginRequest có các trường: public string Email { get; set; } và public string Password { get; set; }
-    private LoginRequest loginModel = new LoginRequest();
+    // 1. Cấu trúc gửi đi (Giữ nguyên)
+    public class LoginRequest
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
 
+    // 2. SỰ THẬT: Cấu trúc hứng dữ liệu phải khớp 100% với API của bạn bạn
+    public class LoginResponse
+    {
+        public string Message { get; set; } = "";
+        public string Token { get; set; } = "";
+        public string Role { get; set; } = "";
+    }
+
+    // Lớp hứng lỗi khi Unauthorized (401)
+    public class ErrorResponse
+    {
+        public string Message { get; set; } = "";
+    }
+
+    private LoginRequest loginModel = new();
+    private string errorMessage = "";
     private bool isLoading = false;
-    private string? errorMessage;
 
     private async Task HandleLogin()
     {
         isLoading = true;
-        errorMessage = null;
-        StateHasChanged();
+        errorMessage = "";
 
         try
         {
-            // 2. Gọi API đăng nhập (POST đến api/Auth/login)
+            // Bắn Request lên API
             var response = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
 
             if (response.IsSuccessStatusCode)
             {
-                // 3. Đọc dữ liệu JSON trả về và map với AuthResponse
-                var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+                // Dùng phễu LoginResponse để hứng 3 biến: message, token, role
+                var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
                 if (result != null && !string.IsNullOrEmpty(result.Token))
                 {
-                    await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
-                    Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
+                    // LỚP PHÒNG THỦ: Kiểm tra Role ngay tại cổng
+                    if (result.Role != "Admin" && result.Role != "Dược sĩ")
+                    {
+                        errorMessage = "Hệ thống từ chối: Tài khoản của bạn không có quyền truy cập Cổng quản trị.";
+                        return;
+                    }
 
-                    // SỬA DÒNG NÀY: Thêm tham số forceLoad: true
+                    // Lưu Token bằng cơ chế JS thuần (đã thống nhất để tránh lỗi Cryptographic)
+                    await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
+
+                    // Đăng nhập thành công, ép tải lại trang để chuyển hướng vào Dashboard
                     NavigationManager.NavigateTo("/", forceLoad: true);
                 }
-                else
-                {
-                    errorMessage = "Đăng nhập thất bại: Không nhận được token từ máy chủ.";
-                }
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                // Xử lý riêng cho mã lỗi 401 (sai email hoặc mật khẩu)
-                errorMessage = "Email hoặc mật khẩu không chính xác!";
             }
             else
             {
-                // Các lỗi khác (500, 404, v.v.)
-                errorMessage = $"Đã xảy ra lỗi hệ thống (Mã: {response.StatusCode}).";
+                // Xử lý nhánh lỗi 401 Unauthorized từ đoạn code: return Unauthorized(new { message = "..." });
+                var errorResult = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                errorMessage = errorResult?.Message ?? "Tài khoản hoặc mật khẩu không chính xác.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Không thể kết nối đến máy chủ: {ex.Message}";
+            errorMessage = $"Sập nguồn kết nối hệ thống: {ex.Message}";
         }
         finally
         {
             isLoading = false;
             StateHasChanged();
         }
-    }
-
-    // 7. Tạo một class để hứng cấu trúc JSON trả về từ AuthController
-    public class AuthResponse
-    {
-        public string Message { get; set; } = string.Empty;
-        public string Token { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
     }
 }

@@ -11,6 +11,8 @@ namespace PharmaDicBackEnd.ApiService.DTOs
         public int TotalDiseases { get; set; }
         public int TotalUsers { get; set; }
         public int TotalCategories { get; set; }
+
+        public List<int> WeeklyTrends { get; set; } = new List<int>();
     }
 
     /// <summary>
