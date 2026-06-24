@@ -6,75 +6,70 @@
     <base href="/" />
     <title>PharmaCheck Admin</title>
 
-    <!-- Tailwind CSS & Plugins -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
-    <!-- Google Fonts & Material Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-    <!-- Tailwind Custom Configuration -->
     <script>
         tailwind.config = {
-        darkMode: "class",
-        theme: {
-        extend: {
-        "colors": {
-        "primary": "#00685f",
-        "background": "#f8f9fa",
-        "surface": "#FFFFFF",
-        "on-background": "#191c1d",
-        "on-surface-variant": "#3d4947",
-        "border": "#E2E8F0",
-        "secondary-container": "#dae2fd",
-        "success": "#10B981",
-        "error": "#ffdad6",
-        "tertiary": "#00628d"
-        },
-        "spacing": {
-        "sidebar-width": "260px",
-        "gutter": "24px",
-        "margin-page": "32px",
-        "stack-lg": "24px",
-        "stack-md": "16px",
-        "stack-sm": "8px",
-        "container-max-width": "1440px"
-        }
-        }
-        }
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#00685f",
+                        "background": "#f8f9fa",
+                        "surface": "#FFFFFF",
+                        "on-background": "#191c1d",
+                        "on-surface-variant": "#3d4947",
+                        "border": "#E2E8F0",
+                        "secondary-container": "#dae2fd",
+                        "success": "#10B981",
+                        "error": "#ffdad6",
+                        "tertiary": "#00628d"
+                    },
+                    "spacing": {
+                        "sidebar-width": "260px",
+                        "gutter": "24px",
+                        "margin-page": "32px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "container-max-width": "1440px"
+                    }
+                }
+            }
         }
     </script>
 
-    <!-- Custom CSS Styles -->
     <style>
         body {
-        font-family: 'Inter', sans-serif;
-        background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
         }
 
         .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        vertical-align: middle;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
         }
 
         .medical-shadow {
-        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
         }
 
         .chart-container {
-        position: relative;
-        height: 300px;
-        width: 100%;
+            position: relative;
+            height: 300px;
+            width: 100%;
         }
     </style>
 
-    <HeadOutlet />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 <body class="text-on-background">
 
-    <Routes />
+    <Routes @rendermode="InteractiveServer" />
 
-    <!-- Blazor Framework Script -->
     <script src="_framework/blazor.web.js"></script>
 </body>
 </html>

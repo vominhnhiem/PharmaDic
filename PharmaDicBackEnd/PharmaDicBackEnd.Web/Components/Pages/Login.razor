@@ -1,109 +1,127 @@
 ﻿@page "/login"
-@* BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ NÚT BẤM HOẠT ĐỘNG TRONG BLAZOR 8 *@
+@using PharmaDicBackEnd.ApiService.DTOs
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
-@inject HttpClient Http
-@inject ProtectedLocalStorage ProtectedLocalStore
-@inject NavigationManager NavigationManager
+<div class="min-h-screen flex flex-col items-center justify-center bg-surface-container-lowest">
+    <div class="bg-white p-10 rounded-2xl shadow-sm border border-border w-full max-w-md">
 
-<PageTitle>Đăng nhập Quản trị - PharmaCheck</PageTitle>
-
-@* Giao diện sử dụng 100% Tailwind CSS đồng bộ với dự án *@
-<div class="flex items-center justify-center min-h-screen bg-surface-container-low">
-    <div class="bg-surface border border-border rounded-lg shadow-lg p-8 w-full max-w-md">
+        @* --- LOGO & TIÊU ĐỀ --- *@
         <div class="text-center mb-8">
-            <h3 class="font-headline-lg text-headline-lg text-primary">Đăng Nhập</h3>
-            <p class="text-on-surface-variant mt-2">Truy cập hệ thống quản trị PharmaCheck</p>
-        </div>
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="bg-error-container text-error px-4 py-3 rounded mb-4 text-sm border border-error">
-                @errorMessage
+            <div class="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">medical_services</span>
             </div>
-        }
-
-        <div class="mb-5">
-            <label class="block text-on-surface font-label-md mb-2">Email hệ thống</label>
-            <input type="email" class="w-full px-4 py-2 border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-surface" @bind="email" placeholder="admin@pharmacheck.com" />
+            <h2 class="text-2xl font-bold text-primary">PharmaCheck Admin</h2>
+            <p class="text-sm text-on-surface-variant mt-1">Vui lòng đăng nhập để tiếp tục</p>
         </div>
 
-        <div class="mb-8">
-            <label class="block text-on-surface font-label-md mb-2">Mật khẩu</label>
-            <input type="password" class="w-full px-4 py-2 border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary bg-surface" @bind="password" placeholder="••••••••" />
-        </div>
+        @* --- FORM ĐĂNG NHẬP --- *@
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
 
-        <button class="w-full bg-primary text-white py-3 rounded font-label-md hover:shadow-md hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2" @onclick="HandleLogin" disabled="@isLoading">
-            @if (isLoading)
+            <div class="space-y-5 mb-6">
+                <div>
+                    <label class="block text-sm font-semibold text-on-surface mb-1">Tài khoản</label>
+                    <InputText @bind-Value="loginModel.Email" class="w-full px-4 py-3 bg-surface-container-lowest border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Nhập tên đăng nhập..." />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-on-surface mb-1">Mật khẩu</label>
+                    <InputText @bind-Value="loginModel.Password" type="password" class="w-full px-4 py-3 bg-surface-container-lowest border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="••••••••" />
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
             {
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Đang xác thực...</span>
+                <div class="bg-error-container text-error px-4 py-3 rounded-lg text-sm mb-6 flex items-center gap-2 font-medium">
+                    <span class="material-symbols-outlined text-lg">error</span>
+                    @errorMessage
+                </div>
             }
-            else
-            {
-                <span class="material-symbols-outlined text-[20px]">login</span>
-                <span>Đăng nhập hệ thống</span>
-            }
-        </button>
+
+            <button type="submit" disabled="@isLoading" class="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex justify-center items-center gap-2 shadow-sm">
+                @if (isLoading)
+                {
+                    <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                    <span>Đang xác thực...</span>
+                }
+                else
+                {
+                    <span class="material-symbols-outlined text-sm">login</span>
+                    <span>Đăng nhập hệ thống</span>
+                }
+            </button>
+        </EditForm>
     </div>
 </div>
 
 @code {
-    private string email = "";
-    private string password = "";
-    private string errorMessage = "";
-    private bool isLoading = false;
+    // 1. Sử dụng đúng mô hình dữ liệu (DTO) của bạn
+    // Chú ý: Đảm bảo class LoginRequest có các trường: public string Email { get; set; } và public string Password { get; set; }
+    private LoginRequest loginModel = new LoginRequest();
 
-    public class LoginResponse
-    {
-        public string Token { get; set; } = "";
-    }
+    private bool isLoading = false;
+    private string? errorMessage;
 
     private async Task HandleLogin()
     {
         isLoading = true;
-        errorMessage = "";
-        bool shouldNavigate = false; // Cờ hiệu an toàn
+        errorMessage = null;
+        StateHasChanged();
 
         try
         {
-            var loginData = new { Email = email, Password = password };
-            var response = await Http.PostAsJsonAsync("api/Auth/login", loginData);
+            // 2. Gọi API đăng nhập (POST đến api/Auth/login)
+            var response = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                // 3. Đọc dữ liệu JSON trả về và map với AuthResponse
+                var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+
                 if (result != null && !string.IsNullOrEmpty(result.Token))
                 {
-                    await ProtectedLocalStore.SetAsync("authToken", result.Token);
-                    shouldNavigate = true; // Đánh dấu thành công
+                    await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
+                    Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
+
+                    // SỬA DÒNG NÀY: Thêm tham số forceLoad: true
+                    NavigationManager.NavigateTo("/", forceLoad: true);
                 }
                 else
                 {
-                    errorMessage = "Phản hồi từ Server bị rỗng hoặc không chứa Token.";
+                    errorMessage = "Đăng nhập thất bại: Không nhận được token từ máy chủ.";
                 }
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Xử lý riêng cho mã lỗi 401 (sai email hoặc mật khẩu)
+                errorMessage = "Email hoặc mật khẩu không chính xác!";
             }
             else
             {
-                errorMessage = "Sai email hoặc mật khẩu. Vui lòng kiểm tra lại!";
+                // Các lỗi khác (500, 404, v.v.)
+                errorMessage = $"Đã xảy ra lỗi hệ thống (Mã: {response.StatusCode}).";
             }
         }
         catch (Exception ex)
         {
-            // Bắt mọi lỗi từ rớt mạng, sai cổng Port, đến lỗi cú pháp
-            errorMessage = "Không thể kết nối đến Máy chủ API.";
-            Console.WriteLine($"Chi tiết lỗi: {ex.Message}");
+            errorMessage = $"Không thể kết nối đến máy chủ: {ex.Message}";
         }
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
+    }
 
-        // ĐƯA LỆNH CHUYỂN TRANG RA KHỎI TRY-CATCH ĐỂ TRÁNH CRASH BLAZOR
-        if (shouldNavigate)
-        {
-            NavigationManager.NavigateTo("/", true);
-        }
+    // 7. Tạo một class để hứng cấu trúc JSON trả về từ AuthController
+    public class AuthResponse
+    {
+        public string Message { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
     }
 }

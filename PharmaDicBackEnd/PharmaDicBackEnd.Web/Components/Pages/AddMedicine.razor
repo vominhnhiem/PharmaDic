@@ -1,8 +1,9 @@
 ﻿@page "/medications/add"
 @using PharmaDicBackEnd.ApiService.DTOs
+@using System.Net.Http.Headers
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
+@inject IJSRuntime JS
 
 @* --- HEADER & NÚT QUAY LẠI --- *@
 <div class="mb-6">
@@ -13,10 +14,9 @@
     <p class="text-on-surface-variant text-sm mt-1">Điền đầy đủ các thông tin bắt buộc (*) để đăng ký thuốc vào hệ thống.</p>
 </div>
 
-@* --- FORM NHẬP LIỆU (Sử dụng EditForm của Blazor) --- *@
+@* --- FORM NHẬP LIỆU --- *@
 <div class="bg-white rounded-xl shadow-sm border border-border p-8 max-w-3xl">
     <EditForm Model="newMedicine" OnValidSubmit="HandleSubmit">
-        @* Kích hoạt cơ chế tự động đọc lỗi (Required, MaxLength) từ class DTO *@
         <DataAnnotationsValidator />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -26,9 +26,19 @@
                 <ValidationMessage For="@(() => newMedicine.MedicineName)" class="text-error text-xs mt-1 font-medium" />
             </div>
 
+            @* Đã thay đổi thành Dropdown chọn tên danh mục *@
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">ID Danh mục *</label>
-                <InputNumber @bind-Value="newMedicine.CategoryId" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" />
+                <label class="block text-sm font-semibold text-on-surface mb-1">Danh mục thuốc *</label>
+                <InputSelect @bind-Value="newMedicine.CategoryId" class="w-full px-4 py-2 bg-surface-container-lowest border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    <option value="0">-- Chọn danh mục --</option>
+                    @if (categories != null)
+                    {
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat.CategoryId.ToString()">@cat.CategoryName</option>
+                        }
+                    }
+                </InputSelect>
                 <ValidationMessage For="@(() => newMedicine.CategoryId)" class="text-error text-xs mt-1 font-medium" />
             </div>
 
@@ -48,7 +58,6 @@
             </div>
         </div>
 
-        @* Hiển thị thông báo lỗi nếu gọi API thất bại *@
         @if (!string.IsNullOrEmpty(submitError))
         {
             <div class="bg-error-container text-error px-4 py-3 rounded-md text-sm mb-6 flex items-center gap-2">
@@ -78,11 +87,31 @@
 </div>
 
 @code {
-    // Đảm bảo bạn đã có CreateMedicineDto trong thư mục DTOs
+    // Sử dụng đúng class DTO đã được định nghĩa trong dự án
     private CreateMedicineDto newMedicine = new CreateMedicineDto();
+
+    // Khai báo biến chứa danh sách danh mục cho Dropdown
+    private List<MedicineCategoryInputDto> categories = new List<MedicineCategoryInputDto>();
 
     private bool isSubmitting = false;
     private string? submitError;
+
+    // Hàm này chạy ngay khi mở trang để tải danh sách Dropdown
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var catResult = await Http.GetFromJsonAsync<PagedResult<MedicineCategoryInputDto>>("api/MedicineCategory?page=1&pageSize=100");
+            if (catResult != null && catResult.Items != null)
+            {
+                categories = catResult.Items;
+            }
+        }
+        catch (Exception ex)
+        {
+            submitError = "Không thể tải danh sách danh mục: " + ex.Message;
+        }
+    }
 
     private async Task HandleSubmit()
     {
@@ -92,17 +121,21 @@
 
         try
         {
-            // Gửi dữ liệu form qua phương thức POST tới API
+            // Bắt buộc đính kèm Token trước khi gọi API POST
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
             var response = await Http.PostAsJsonAsync("api/Medicine", newMedicine);
 
             if (response.IsSuccessStatusCode)
             {
-                // Nếu API báo thành công, lập tức chuyển hướng về trang danh sách
                 NavigationManager.NavigateTo("/medications");
             }
             else
             {
-                // Nếu lỗi (ví dụ: Thiếu Token Authorize), hiển thị mã lỗi
                 submitError = $"Hệ thống từ chối yêu cầu (Mã lỗi: {response.StatusCode}). Vui lòng kiểm tra lại.";
             }
         }
