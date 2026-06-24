@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PharmaDicBackEnd.ApiService.DTOs;
+using PharmaDicBackEnd.ApiService.Models;
 using PharmaDicBackEnd.ApiService.Services;
 
 namespace PharmaDicBackEnd.ApiService.Controllers;
@@ -11,17 +13,21 @@ public class AiController : ControllerBase
     private readonly MedicalChatbotService _chatbotService;
     private readonly DrugInteractionAiService _interactionService;
     private readonly TreatmentRegimenAiService _regimenService;
+    private readonly DrugLookupAppContext _dbContext;
 
     public AiController(
-        MedicalChatbotService chatbotService, 
-        DrugInteractionAiService interactionService, 
-        TreatmentRegimenAiService regimenService)
+        MedicalChatbotService chatbotService,
+        DrugInteractionAiService interactionService,
+        TreatmentRegimenAiService regimenService,
+        DrugLookupAppContext dbContext)
     {
         _chatbotService = chatbotService;
         _interactionService = interactionService;
         _regimenService = regimenService;
+        _dbContext = dbContext;
     }
 
+    // Chat AI
     [HttpPost("chat")]
     public async Task<IActionResult> Chat([FromBody] ChatRequest request)
     {
@@ -30,15 +36,27 @@ public class AiController : ControllerBase
 
         try
         {
-            var response = await _chatbotService.AskMedicalQuestionAsync(request.Question);
-            return Ok(new { Answer = response });
+            var response = await _chatbotService
+                .AskMedicalQuestionAsync(
+                    request.UserId,
+                    request.Question);
+
+            return Ok(new
+            {
+                Answer = response
+            });
         }
         catch (Exception ex)
         {
-            return Ok(new { IsError = true, Error = ex.Message, StackTrace = ex.StackTrace });
+            return StatusCode(500, new
+            {
+                IsError = true,
+                Error = ex.Message
+            });
         }
     }
 
+    // Kiểm tra tương tác thuốc
     [HttpPost("check-interaction")]
     public async Task<IActionResult> CheckInteraction([FromBody] InteractionRequest request)
     {
@@ -47,15 +65,25 @@ public class AiController : ControllerBase
 
         try
         {
-            var response = await _interactionService.CheckDrugInteractionsAsync(request.MedicineIds);
-            return Ok(new { Answer = response });
+            var response = await _interactionService
+                .CheckDrugInteractionsAsync(request.MedicineIds);
+
+            return Ok(new
+            {
+                Answer = response
+            });
         }
         catch (Exception ex)
         {
-            return Ok(new { IsError = true, Error = ex.Message, StackTrace = ex.StackTrace });
+            return StatusCode(500, new
+            {
+                IsError = true,
+                Error = ex.Message
+            });
         }
     }
 
+    // Gợi ý phác đồ điều trị
     [HttpPost("suggest-regimen")]
     public async Task<IActionResult> SuggestRegimen([FromBody] RegimenRequest request)
     {
@@ -64,12 +92,59 @@ public class AiController : ControllerBase
 
         try
         {
-            var response = await _regimenService.SuggestTreatmentPlanAsync(request.Symptoms);
-            return Ok(new { Answer = response });
+            var response = await _regimenService
+                .SuggestTreatmentPlanAsync(request.Symptoms);
+
+            return Ok(new
+            {
+                Answer = response
+            });
         }
         catch (Exception ex)
         {
-            return Ok(new { IsError = true, Error = ex.Message, StackTrace = ex.StackTrace });
+            return StatusCode(500, new
+            {
+                IsError = true,
+                Error = ex.Message
+            });
         }
+    }
+
+    // Xem lịch sử chat AI theo User
+    [HttpGet("history/{userId}")]
+    public async Task<IActionResult> GetHistory(int userId)
+    {
+        var histories = await _dbContext.AIChatHistories
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new
+            {
+                x.ChatId,
+                x.Question,
+                x.Answer,
+                x.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(histories);
+    }
+
+    // Xóa một lịch sử chat
+    [HttpDelete("history/{chatId}")]
+    public async Task<IActionResult> DeleteHistory(int chatId)
+    {
+        var history = await _dbContext.AIChatHistories
+            .FindAsync(chatId);
+
+        if (history == null)
+            return NotFound("Không tìm thấy lịch sử.");
+
+        _dbContext.AIChatHistories.Remove(history);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new
+        {
+            Message = "Đã xóa lịch sử thành công."
+        });
     }
 }

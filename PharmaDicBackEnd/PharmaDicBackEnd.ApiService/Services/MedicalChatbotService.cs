@@ -8,50 +8,104 @@ public class MedicalChatbotService
     private readonly GroqAiService _groqService;
     private readonly DrugLookupAppContext _dbContext;
 
-    public MedicalChatbotService(GroqAiService geminiService, DrugLookupAppContext dbContext)
+    public MedicalChatbotService(
+        GroqAiService groqService,
+        DrugLookupAppContext dbContext)
     {
-        _groqService = geminiService;
+        _groqService = groqService;
         _dbContext = dbContext;
     }
 
-    public async Task<string> AskMedicalQuestionAsync(string question)
+    public async Task<string> AskMedicalQuestionAsync(
+        int userId,
+        string question)
     {
-        // 1. Dùng Gemini trích xuất từ khóa tìm kiếm (ngắn gọn)
-        string extractPrompt = "Bạn là một trợ lý y tế. Hãy trích xuất 1 từ khóa quan trọng nhất (tên thuốc, tên bệnh, hoặc triệu chứng) từ câu hỏi sau để tìm kiếm trong cơ sở dữ liệu. Chỉ trả về đúng 1 từ khóa đó, không giải thích gì thêm.";
-        string keyword = await _groqService.GenerateContentAsync(extractPrompt, question);
-        keyword = keyword.Trim().Replace("\"", ""); // Xóa khoảng trắng hoặc ngoặc kép thừa
+        // 1. Trích xuất từ khóa
+        string extractPrompt = @"
+Bạn là một trợ lý y tế.
+Hãy trích xuất duy nhất 1 từ khóa quan trọng nhất
+(tên thuốc, bệnh hoặc triệu chứng) từ câu hỏi dưới đây.
+Chỉ trả về đúng 1 từ khóa, không giải thích.";
 
-        // 2. Tìm kiếm trong SQL Database (tìm thuốc theo tên hoặc công dụng chứa từ khóa)
+        string keyword = await _groqService.GenerateContentAsync(
+            extractPrompt,
+            question);
+
+        keyword = keyword.Trim().Replace("\"", "");
+
+        // Nếu AI không trích xuất được từ khóa
+        if (string.IsNullOrWhiteSpace(keyword))
+        {
+            keyword = question;
+        }
+
+        // 2. Tìm kiếm trong CSDL
         var searchResults = await _dbContext.Medicines
             .Include(m => m.Category)
             .Where(m =>
-    (m.MedicineName ?? "").Contains(keyword) ||
-    (m.Uses ?? "").Contains(keyword))
-            .Take(5) // Lấy tối đa 5 kết quả
+                (m.MedicineName ?? "").Contains(keyword) ||
+                (m.Uses ?? "").Contains(keyword))
+            .OrderBy(m => m.MedicineName)
+            .Take(5)
             .ToListAsync();
 
-        string context = "";
+        // 3. Tạo context cho AI
+        string context;
+
         if (searchResults.Any())
         {
+            context = "Thông tin từ cơ sở dữ liệu:\n";
+
             foreach (var med in searchResults)
             {
-                var category = med.Category?.CategoryName ?? "Chưa phân loại";
-                context += $"- Thuốc {med.MedicineName} (Nhóm: {category}): {med.Uses}\n";
+                var category = med.Category?.CategoryName
+                               ?? "Chưa phân loại";
+
+                context +=
+                    $"- Thuốc: {med.MedicineName}\n" +
+                    $"  Nhóm: {category}\n" +
+                    $"  Công dụng: {med.Uses}\n" +
+                    $"  Tác dụng phụ: {med.SideEffects}\n\n";
             }
         }
         else
         {
-            context = "Không tìm thấy thông tin cụ thể trong cơ sở dữ liệu cho câu hỏi này.";
+            context = "Không tìm thấy thông tin trong cơ sở dữ liệu.";
         }
 
-        // 3. Gửi thông tin tìm được cho Gemini để tạo câu trả lời cuối cùng
-        string systemPrompt = @"Bạn là một chuyên gia y tế AI. 
-Hãy trả lời câu hỏi của người dùng một cách chính xác, ngắn gọn và dễ hiểu.
-Nếu có thông tin liên quan từ cơ sở dữ liệu (được cung cấp dưới đây), hãy ưu tiên sử dụng thông tin đó.
-Lưu ý: Luôn có một cảnh báo nhỏ ở cuối câu trả lời rằng 'Thông tin chỉ mang tính tham khảo, vui lòng hỏi ý kiến bác sĩ'.";
+        // 4. Prompt trả lời cuối cùng
+        string systemPrompt = @"
+Bạn là một chuyên gia dược lâm sàng AI.
 
-        string userPrompt = $"Câu hỏi: {question}\n\nThông tin tham khảo từ CSDL:\n{context}";
+Nhiệm vụ:
+- Trả lời chính xác, ngắn gọn, dễ hiểu.
+- Ưu tiên thông tin lấy từ cơ sở dữ liệu.
+- Nếu CSDL không có, sử dụng kiến thức y khoa của bạn.
+- Không chẩn đoán chắc chắn bệnh.
+- Luôn kết thúc bằng:
 
-        return await _groqService.GenerateContentAsync(systemPrompt, userPrompt);
+'Thông tin chỉ mang tính tham khảo, vui lòng hỏi ý kiến bác sĩ.'";
+
+        string userPrompt =
+            $"Câu hỏi: {question}\n\n" +
+            $"{context}";
+
+        string answer = await _groqService.GenerateContentAsync(
+            systemPrompt,
+            userPrompt);
+
+        // 5. Lưu lịch sử chat
+        var history = new AIChatHistory
+        {
+            UserId = userId,
+            Question = question,
+            Answer = answer,
+            CreatedAt = DateTime.Now
+        };
+
+        _dbContext.AIChatHistories.Add(history);
+        await _dbContext.SaveChangesAsync();
+
+        return answer;
     }
 }
