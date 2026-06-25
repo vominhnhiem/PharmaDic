@@ -4,7 +4,6 @@ using PharmaDicBackEnd.ApiService.DTOs;
 using PharmaDicBackEnd.ApiService.Models;
 using PharmaDicBackEnd.ApiService.Services;
 
-
 namespace PharmaDicBackEnd.ApiService.Controllers;
 
 [ApiController]
@@ -36,9 +35,24 @@ public class AiController : ControllerBase
 
         try
         {
-            var response =
-                await _chatbotService.AskMedicalQuestionAsync(request.Question);
+            // 1. Gọi AI lấy câu trả lời
+            var response = await _chatbotService.AskMedicalQuestionAsync(request.Question);
 
+            // 2. Kiểm tra UserId có tồn tại trong DB không để tránh lỗi Foreign Key
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == request.UserId);
+
+            if (!userExists)
+            {
+                // Nếu User không tồn tại, vẫn trả về câu trả lời nhưng báo lỗi không lưu được lịch sử
+                return Ok(new
+                {
+                    Answer = response,
+                    IsError = true,
+                    Error = "Không thể lưu lịch sử: UserId " + request.UserId + " không tồn tại trong hệ thống."
+                });
+            }
+
+            // 3. Tạo đối tượng lịch sử
             var history = new AIChatHistory
             {
                 UserId = request.UserId,
@@ -47,8 +61,22 @@ public class AiController : ControllerBase
                 CreatedAt = DateTime.Now
             };
 
-            _context.AIChatHistories.Add(history);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.AIChatHistories.Add(history);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Lỗi này thường do nội dung Question hoặc Answer quá dài vượt quá giới hạn DB (NVARCHAR(MAX) vs NVARCHAR(255))
+                var innerMessage = dbEx.InnerException?.Message ?? dbEx.Message;
+                return Ok(new
+                {
+                    Answer = response,
+                    IsError = true,
+                    Error = "Lỗi Database khi lưu lịch sử: " + innerMessage
+                });
+            }
 
             return Ok(new
             {
@@ -60,10 +88,8 @@ public class AiController : ControllerBase
             return Ok(new
             {
                 IsError = true,
-                Error = ex.Message,
-                InnerException = ex.InnerException?.Message,
-                InnerInnerException = ex.InnerException?.InnerException?.Message,
-                StackTrace = ex.StackTrace
+                Error = "Lỗi hệ thống: " + ex.Message,
+                Detail = ex.InnerException?.Message
             });
         }
     }
@@ -91,10 +117,7 @@ public class AiController : ControllerBase
         _context.AIChatHistories.Remove(history);
         await _context.SaveChangesAsync();
 
-        return Ok(new
-        {
-            Message = "Đã xóa lịch sử chat."
-        });
+        return Ok(new { Message = "Đã xóa lịch sử chat." });
     }
 
     [HttpPost("check-interaction")]
@@ -105,21 +128,12 @@ public class AiController : ControllerBase
 
         try
         {
-            var response =
-                await _interactionService.CheckDrugInteractionsAsync(request.MedicineIds);
-
+            var response = await _interactionService.CheckDrugInteractionsAsync(request.MedicineIds);
             return Ok(new { Answer = response });
         }
         catch (Exception ex)
         {
-            return Ok(new
-            {
-                IsError = true,
-                Error = ex.Message,
-                InnerException = ex.InnerException?.Message,
-                InnerInnerException = ex.InnerException?.InnerException?.Message,
-                StackTrace = ex.StackTrace
-            });
+            return Ok(new { IsError = true, Error = ex.Message });
         }
     }
 
@@ -131,22 +145,12 @@ public class AiController : ControllerBase
 
         try
         {
-            var response =
-                await _regimenService.SuggestTreatmentPlanAsync(request.Symptoms);
-
+            var response = await _regimenService.SuggestTreatmentPlanAsync(request.Symptoms);
             return Ok(new { Answer = response });
         }
         catch (Exception ex)
         {
-            return Ok(new
-            {
-                IsError = true,
-                Error = ex.Message,
-                InnerException = ex.InnerException?.Message,
-                InnerInnerException = ex.InnerException?.InnerException?.Message,
-                StackTrace = ex.StackTrace
-            });
+            return Ok(new { IsError = true, Error = ex.Message });
         }
     }
-   
 }
