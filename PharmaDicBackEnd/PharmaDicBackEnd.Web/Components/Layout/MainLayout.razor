@@ -35,11 +35,6 @@
                 <span>Danh mục thuốc</span>
             </NavLink>
 
-            <NavLink class="nav-item" href="/symptoms">
-                <span class="material-symbols-outlined">clinical_notes</span>
-                <span>Nhật ký triệu chứng</span>
-            </NavLink>
-
             <NavLink class="nav-item" href="/users">
                 <span class="material-symbols-outlined">group</span>
                 <span>Người dùng</span>
@@ -69,15 +64,18 @@
     <header class="fixed top-0 right-0 left-64 h-16 z-40 bg-surface/80 backdrop-blur-md border-b border-border flex justify-between items-center px-8">
         <div class="flex items-center bg-surface-container-low px-4 py-2 rounded-lg w-96 transition-shadow focus-within:shadow-sm focus-within:ring-1 focus-within:ring-primary">
             <span class="material-symbols-outlined text-on-surface-variant mr-2">search</span>
-            <input class="bg-transparent border-none outline-none focus:ring-0 text-body-md w-full" placeholder="Tìm kiếm nhanh..." type="text">
+            @* Bắt sự kiện gõ phím và gắn biến *@
+            <input @bind="searchKeyword" @bind:event="oninput" @onkeyup="HandleSearch" class="bg-transparent border-none outline-none focus:ring-0 text-body-md w-full" placeholder="Nhập từ khóa và ấn Enter..." type="text">
         </div>
 
         <div class="flex items-center gap-4 cursor-pointer hover:bg-surface-container-low p-2 rounded-lg transition-colors">
             <div class="text-right">
-                <p class="font-label-md font-bold text-primary">Admin User</p>
-                <p class="text-[10px] text-on-surface-variant uppercase">Hệ thống cấp cao</p>
+                @* SỬA Ở ĐÂY: Hiển thị tên và quyền động *@
+                <p class="font-label-md font-bold text-primary">@displayUserName</p>
+                <p class="text-[10px] text-on-surface-variant uppercase">@displayRole</p>
             </div>
-            <img alt="Avatar" class="w-10 h-10 rounded-full border-2 border-primary/20" src="https://ui-avatars.com/api/?name=Admin&background=random">
+            @* SỬA Ở ĐÂY: Avatar sinh tự động dựa trên tên *@
+            <img alt="Avatar" class="w-10 h-10 rounded-full border-2 border-primary/20 shadow-sm" src="https://ui-avatars.com/api/?name=@(displayUserName)&background=00685f&color=fff">
         </div>
     </header>
 
@@ -133,6 +131,10 @@
 @code {
     private bool isLoggedIn = false;
 
+    // BIẾN ĐỘNG CHO NAVBAR
+    private string displayUserName = "Đang tải...";
+    private string displayRole = "Hệ thống";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -144,6 +146,25 @@
             {
                 isLoggedIn = true;
                 Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // LẤY THÔNG TIN USER TỪ LOCALSTORAGE ĐỂ HIỂN THỊ
+                try
+                {
+                    var name = await JS.InvokeAsync<string>("localStorage.getItem", "userName");
+                    var role = await JS.InvokeAsync<string>("localStorage.getItem", "userRole");
+
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        // Cắt bỏ đuôi @gmail.com (nếu có) để tên hiển thị gọn gàng hơn
+                        displayUserName = name.Contains("@") ? name.Split('@')[0] : name;
+                        displayRole = !string.IsNullOrEmpty(role) ? role : "Quản trị viên";
+                    }
+                }
+                catch
+                {
+                    // Bỏ qua nếu có lỗi nhỏ lúc đọc JS
+                }
+
                 StateHasChanged();
 
                 if (isLoginPage)
@@ -166,9 +187,38 @@
 
     private async Task HandleLogout()
     {
+        // DỌN DẸP SẠCH BỘ NHỚ KHI ĐĂNG XUẤT
         await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "userName");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "userRole");
+
         Http.DefaultRequestHeaders.Authorization = null;
         isLoggedIn = false;
+
         NavigationManager.NavigateTo("/login", forceLoad: true);
+    }
+
+    // BIẾN CHO THANH TÌM KIẾM
+    private string searchKeyword = "";
+
+    private void HandleSearch(KeyboardEventArgs e)
+    {
+        // Khi người dùng ấn Enter
+        if (e.Key == "Enter")
+        {
+            var currentUrl = NavigationManager.Uri.ToLower();
+            string keyword = Uri.EscapeDataString(searchKeyword.Trim());
+
+            // Chuyển hướng thông minh: Đang ở trang nào thì gắn Query String vào trang đó
+            if (currentUrl.Contains("/categories"))
+            {
+                NavigationManager.NavigateTo($"/categories?search={keyword}", forceLoad: true);
+            }
+            else
+            {
+                // Mặc định ném về trang quản lý thuốc
+                NavigationManager.NavigateTo($"/medications?search={keyword}", forceLoad: true);
+            }
+        }
     }
 }

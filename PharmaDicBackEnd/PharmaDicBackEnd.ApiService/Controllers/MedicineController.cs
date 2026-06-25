@@ -21,37 +21,54 @@ namespace PharmaDicBackEnd.ApiService.Controllers
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAllMedicines([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<PagedResult<MedicineDto>>> GetAll(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] int? categoryId = null) // <-- BỔ SUNG THAM SỐ NHẬN ID DANH MỤC
         {
             // 1. Đảm bảo tham số hợp lệ
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
 
-            // 2. Đếm tổng số lượng thuốc trong DB
-            var totalItems = await _context.Medicines.CountAsync();
+            // 2. Mở đường ống truy vấn
+            var query = _context.Medicines.AsQueryable();
 
-            // 3. Truy vấn cắt dữ liệu theo trang
-            var medicines = await _context.Medicines
-       .Include(m => m.Category)
-       .OrderBy(m => m.MedicineId)
-       .Skip((page - 1) * pageSize)
-       .Take(pageSize)
-       .Select(m => new MedicineDto
-       {
-           MedicineId = m.MedicineId,
-           MedicineName = m.MedicineName,
-           CategoryName = m.Category != null ? m.Category.CategoryName : "Chưa phân loại",
-           DosageForm = m.DosageForm,
-           Manufacturer = m.Manufacturer,
-           Uses = m.Uses,
+            // 3. LỌC THEO TỪ KHÓA (Sửa lại để tìm kiếm không phân biệt hoa thường nếu cần)
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(m => m.MedicineName.Contains(search));
+            }
 
-           // THÊM 2 DÒNG NÀY ĐỂ LẤY DỮ LIỆU TỪ SQL
-           Dosage = m.Dosage,
-           Contraindications = m.Contraindications
-       })
-       .ToListAsync();
+            // 4. LỌC THEO DANH MỤC (Bổ sung mới)
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(m => m.CategoryId == categoryId.Value);
+            }
 
-            // 4. Đóng gói kết quả trả về
+            // 5. Đếm tổng số lượng thuốc (SỬA LỖI: Phải đếm trên biến `query` thay vì `_context`)
+            var totalItems = await query.CountAsync();
+
+            // 6. Lấy dữ liệu theo trang (SỬA LỖI: Phải truy vấn từ biến `query`)
+            var medicines = await query
+                .Include(m => m.Category)
+                .OrderBy(m => m.MedicineId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(m => new MedicineDto
+                {
+                    MedicineId = m.MedicineId,
+                    MedicineName = m.MedicineName,
+                    CategoryName = m.Category != null ? m.Category.CategoryName : "Chưa phân loại",
+                    DosageForm = m.DosageForm,
+                    Manufacturer = m.Manufacturer,
+                    Uses = m.Uses,
+                    UpdatedAt = m.CreatedAt,
+                    UpdatedBy = "Admin"
+                })
+                .ToListAsync();
+
+            // 7. Đóng gói kết quả trả về
             var result = new PagedResult<MedicineDto>
             {
                 Items = medicines,

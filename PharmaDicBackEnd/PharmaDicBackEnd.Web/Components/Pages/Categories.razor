@@ -3,7 +3,7 @@
 @inject HttpClient Http
 @rendermode InteractiveServer
 @inject IJSRuntime JS
-
+@inject NavigationManager NavigationManager
 @* --- HEADER --- *@
 <div class="flex justify-between items-center mb-6">
     <div>
@@ -119,13 +119,33 @@
     private PagedResult<MedicineCategoryInputDto>? pagedResult;
     private string? errorMessage;
     private bool isLoading = true;
-
+    [SupplyParameterFromQuery(Name = "search")]
+    public string? SearchKeyword { get; set; }
     private int currentPage = 1;
     private int pageSize = 10;
 
-    protected override async Task OnInitializedAsync()
+    // SỰ THẬT: Phải dùng OnAfterRenderAsync để kết nối được với JavaScript và lấy Token
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadData(currentPage);
+        if (firstRender)
+        {
+            // 1. Lấy "chìa khóa" từ bộ nhớ trình duyệt
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+            // 2. Chặn cửa ngay lập tức nếu là khách không mời
+            if (string.IsNullOrEmpty(token))
+            {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            // 3. Đính kèm Token vào mọi Request gửi đi từ trang này
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            // 4. Khởi động việc tải dữ liệu
+            await LoadData(currentPage);
+            StateHasChanged(); // Bắt buộc gọi để giao diện cập nhật sau khi có dữ liệu
+        }
     }
 
     private async Task LoadData(int page)
@@ -136,15 +156,30 @@
 
         try
         {
-            pagedResult = await Http.GetFromJsonAsync<PagedResult<MedicineCategoryInputDto>>($"api/MedicineCategory?page={page}&pageSize={pageSize}");
+            string apiUrl = $"api/MedicineCategory?page={page}&pageSize={pageSize}";
+
+            // 2. BƠM TỪ KHÓA VÀO API: Nếu thanh địa chỉ có chữ tìm kiếm, lập tức nối vào chuỗi
+            if (!string.IsNullOrWhiteSpace(SearchKeyword))
+            {
+                apiUrl += $"&search={Uri.EscapeDataString(SearchKeyword)}";
+            }
+
+            // 3. Gọi API với đường dẫn đã được nâng cấp (Bao gồm cả phân trang + tìm kiếm)
+            pagedResult = await Http.GetFromJsonAsync<PagedResult<MedicineCategoryInputDto>>(apiUrl);
 
             if (pagedResult != null)
             {
                 currentPage = pagedResult.CurrentPage;
             }
         }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            // Bẫy lỗi 401: Token bị sai hoặc đã hết hạn -> Trục xuất về trang Login
+            NavigationManager.NavigateTo("/login");
+        }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
+            // Xử lý an toàn khi bảng danh mục trong Database đang trống rỗng
             pagedResult = new PagedResult<MedicineCategoryInputDto>();
         }
         catch (Exception ex)
@@ -154,30 +189,43 @@
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
     }
 
     private async Task DeleteMedicineCategory(int id, string name)
     {
-        // Hiển thị hộp thoại xác nhận
         bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xóa danh mục thuốc '{name}' khỏi hệ thống không?");
         if (confirmed)
         {
+            isLoading = true;
+            StateHasChanged();
+
             try
             {
                 var response = await Http.DeleteAsync($"api/MedicineCategory/{id}");
                 if (response.IsSuccessStatusCode)
                 {
-                    await LoadData(currentPage); // Tải lại trang hiện tại
+                    await LoadData(currentPage); // Nạp lại bảng ngay sau khi xóa
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    // Trục xuất nếu mất quyền giữa chừng
+                    NavigationManager.NavigateTo("/login");
                 }
                 else
                 {
-                    errorMessage = $"Không thể xóa. Máy chủ trả về lỗi: {response.StatusCode}";
+                    errorMessage = $"Không thể xóa. Máy chủ trả về lỗi: {response.StatusCode} (Có thể danh mục này đang chứa thuốc)";
                 }
             }
             catch (Exception ex)
             {
                 errorMessage = $"Lỗi kết nối: {ex.Message}";
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged();
             }
         }
     }

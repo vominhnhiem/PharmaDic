@@ -110,7 +110,8 @@
 
                     // Lưu Token bằng cơ chế JS thuần (đã thống nhất để tránh lỗi Cryptographic)
                     await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
-
+                    await JS.InvokeVoidAsync("localStorage.setItem", "userName", loginModel.Email);
+                    await JS.InvokeVoidAsync("localStorage.setItem", "userRole", result.Role);
                     // Đăng nhập thành công, ép tải lại trang để chuyển hướng vào Dashboard
                     NavigationManager.NavigateTo("/", forceLoad: true);
                 }

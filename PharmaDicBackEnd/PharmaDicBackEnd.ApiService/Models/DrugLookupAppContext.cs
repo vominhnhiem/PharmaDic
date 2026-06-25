@@ -39,8 +39,8 @@ public partial class DrugLookupAppContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public DbSet<AIChatHistory> AIChatHistories { get; set; }
 
+    public DbSet<AIChatHistory> AIChatHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

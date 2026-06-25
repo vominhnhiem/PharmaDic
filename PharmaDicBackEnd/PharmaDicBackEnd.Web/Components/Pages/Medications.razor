@@ -1,86 +1,130 @@
 ﻿@page "/medications"
-@using PharmaDicBackEnd.ApiService.DTOs
+@using System.Net.Http.Headers
 @inject HttpClient Http
-@rendermode InteractiveServer
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@using PharmaDicBackEnd.ApiService.DTOs
+<PageTitle>Danh sách thuốc - PharmaCheck</PageTitle>
 
 @* --- HEADER --- *@
-<div class="flex justify-between items-center mb-6">
+<div class="mb-6 flex justify-between items-end">
     <div>
-        <h2 class="text-2xl font-bold text-primary">Quản lý thuốc</h2>
-        <p class="text-on-surface-variant text-sm mt-1">Danh sách tất cả các loại thuốc trong hệ thống</p>
+        <h2 class="text-2xl font-bold text-gray-800">Danh sách thuốc</h2>
+        <p class="text-sm text-gray-500 mt-1">Quản lý và cập nhật thông tin kho dược phẩm hệ thống.</p>
     </div>
-    <a href="/medications/add" class="bg-primary text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-primary/90 transition-shadow shadow-sm decoration-none">
-        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 600;">add</span>
+    <a href="/medications/add" class="flex items-center gap-2 px-4 py-2 bg-[#00685f] text-white font-medium rounded-md hover:bg-[#00524b] transition-all text-sm shadow-sm decoration-none">
+        <span class="material-symbols-outlined text-[18px]">add</span>
         Thêm thuốc mới
     </a>
 </div>
 
-@* --- BẢNG DỮ LIỆU --- *@
-<div class="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+@* --- BẢNG DỮ LIỆU CHÍNH --- *@
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm mb-6">
+
+    @* BỘ LỌC TÌM KIẾM & DANH MỤC ĐỘNG *@
+    <div class="flex gap-4 px-6 py-4 border-b border-gray-100 bg-white rounded-t-xl">
+        <div class="relative w-64">
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-500 text-sm">filter_list</span>
+
+            <select @onchange="OnCategoryChanged" class="w-full pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-md text-sm outline-none focus:ring-1 focus:ring-[#00685f] appearance-none cursor-pointer">
+                <option value="">Tất cả danh mục</option>
+                @foreach (var cat in categoriesList)
+                {
+                    <option value="@cat.CategoryId">@cat.CategoryName</option>
+                }
+            </select>
+            <span class="material-symbols-outlined absolute right-3 top-2.5 text-gray-500 pointer-events-none text-sm">expand_more</span>
+        </div>
+    </div>
+
     @if (isLoading)
     {
-        <div class="p-12 text-center text-primary flex flex-col items-center justify-center">
-            <span class="material-symbols-outlined animate-spin text-4xl mb-3">progress_activity</span>
-            <p class="font-medium text-on-surface-variant">Đang tải dữ liệu từ hệ thống...</p>
+        <div class="flex justify-center items-center py-20">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00685f]"></div>
         </div>
     }
     else if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="p-12 text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-error-container text-error mb-4">
-                <span class="material-symbols-outlined text-3xl">error</span>
-            </div>
-            <h3 class="text-lg font-bold text-error mb-2">Đã xảy ra lỗi</h3>
-            <p class="text-on-surface-variant max-w-md mx-auto">@errorMessage</p>
-            <button @onclick="() => LoadData(currentPage)" class="mt-4 px-4 py-2 border border-error text-error rounded-md hover:bg-error-container transition-colors">
-                Thử lại
-            </button>
+        <div class="m-6 bg-red-50 text-red-600 p-4 rounded-md text-sm font-medium border border-red-100 flex items-center gap-2 shadow-sm">
+            <span class="material-symbols-outlined">error</span> @errorMessage
         </div>
     }
     else if (pagedResult == null || !pagedResult.Items.Any())
     {
-        <div class="p-16 text-center">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-surface-container text-on-surface-variant mb-4">
-                <span class="material-symbols-outlined text-4xl">medication</span>
+        <div class="py-16 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 text-gray-400 mb-4 border border-gray-100">
+                <span class="material-symbols-outlined text-3xl">medication</span>
             </div>
-            <h3 class="text-xl font-bold text-on-surface mb-2">Chưa có dữ liệu thuốc</h3>
-            <p class="text-on-surface-variant max-w-sm mx-auto mb-6">Hệ thống của bạn hiện chưa có loại thuốc nào được đăng ký.</p>
+            <h3 class="text-lg font-bold text-gray-700 mb-1">Chưa có dữ liệu</h3>
+            <p class="text-gray-500 text-sm">Hệ thống hiện chưa có loại thuốc nào khớp với bộ lọc.</p>
         </div>
     }
     else
     {
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm whitespace-nowrap">
-                <thead class="bg-surface-container-lowest border-b border-border text-on-surface-variant">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold w-16">ID</th>
-                        <th class="px-6 py-4 font-semibold">Tên thuốc</th>
-                        <th class="px-6 py-4 font-semibold">Danh mục</th>
-                        <th class="px-6 py-4 font-semibold">Dạng bào chế</th>
-                        <th class="px-6 py-4 font-semibold">Nhà sản xuất</th>
-                        <th class="px-6 py-4 font-semibold text-right w-24">Thao tác</th>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-100 bg-gray-50/50">
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tên thuốc</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Danh mục</th>
+                        @* Đã thay đổi 2 cột ở đây *@
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Dạng bào chế</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider w-64">Công dụng chính</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Cập nhật lần cuối</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border">
+                <tbody class="divide-y divide-gray-50">
                     @foreach (var med in pagedResult.Items)
                     {
-                        <tr class="hover:bg-surface-container-lowest/60 transition-colors">
-                            <td class="px-6 py-4 font-medium text-on-surface-variant">#@med.MedicineId</td>
-                            <td class="px-6 py-4 font-bold text-primary">@med.MedicineName</td>
+                        string sku = $"PH-{(med.CategoryName.Length >= 2 ? med.CategoryName.Substring(0, 2).ToUpper() : "MD")}-{med.MedicineId.ToString("D3")}";
+
+                        <tr class="hover:bg-gray-50/80 transition-colors">
                             <td class="px-6 py-4">
-                                <span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-medium">
-                                    @med.CategoryName
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg text-[#00685f] bg-[#00685f]/10 border border-[#00685f]/20 flex items-center justify-center shadow-sm flex-shrink-0">
+                                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pill</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-800">@med.MedicineName</p>
+                                        <p class="text-[11px] text-gray-500 font-mono mt-0.5 tracking-wide">SKU: @sku</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm text-gray-600">@med.CategoryName</span>
+                            </td>
+
+                            @* Thêm cột Dạng bào chế *@
+                            <td class="px-6 py-4">
+                                <span class="text-sm text-gray-600">@(string.IsNullOrEmpty(med.DosageForm) ? "Chưa rõ" : med.DosageForm)</span>
+                            </td>
+
+                            @* Thêm cột Công dụng (Dùng truncate để cắt chữ dài, title để hiện tooltip khi hover) *@
+                            <td class="px-6 py-4 max-w-[16rem]">
+                                <span class="text-sm text-gray-600 block truncate" title="@med.Uses">
+                                    @(string.IsNullOrEmpty(med.Uses) ? "Đang cập nhật..." : med.Uses)
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-on-surface-variant">@med.DosageForm</td>
-                            <td class="px-6 py-4 text-on-surface-variant">@med.Manufacturer</td>
-                            <td class="px-6 py-4 text-right">
+
+                            <td class="px-6 py-4">
+                                @if (med.UpdatedAt.HasValue)
+                                {
+                                    <p class="text-xs text-gray-800 font-medium">@med.UpdatedAt.Value.ToString("HH:mm"),</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">@med.UpdatedAt.Value.ToString("dd/MM/yyyy")</p>
+                                }
+                                else
+                                {
+                                    <p class="text-xs text-gray-500 italic">Chưa cập nhật</p>
+                                }
+                                <p class="text-[10px] text-gray-400 mt-0.5 italic">Bởi @(string.IsNullOrEmpty(med.UpdatedBy) ? "Hệ thống" : med.UpdatedBy)</p>
+                            </td>
+                            <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-1">
-                                    <a href="/medications/edit/@med.MedicineId" class="text-primary hover:bg-primary/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                                    <a href="/medications/edit/@med.MedicineId" class="text-gray-400 hover:text-blue-600 hover:bg-blue-50 p-1.5 rounded transition-colors" title="Sửa">
                                         <span class="material-symbols-outlined text-[20px]">edit</span>
                                     </a>
-                                    <button type="button" @onclick="() => DeleteMedicine(med.MedicineId, med.MedicineName)" class="text-error hover:bg-error/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                                    <button @onclick="() => DeleteMedicine(med.MedicineId, med.MedicineName)" class="text-gray-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded transition-colors" title="Xóa">
                                         <span class="material-symbols-outlined text-[20px]">delete</span>
                                     </button>
                                 </div>
@@ -92,34 +136,31 @@
         </div>
 
         @* --- FOOTER PHÂN TRANG --- *@
-        <div class="px-6 py-4 border-t border-border bg-surface-container-lowest flex items-center justify-between">
-            <span class="text-sm text-on-surface-variant">
-                Hiển thị <strong>@pagedResult.Items.Count</strong> trên tổng số <strong>@pagedResult.TotalItems</strong> kết quả
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/30 flex items-center justify-between">
+            @{
+                int startItem = (pagedResult.CurrentPage - 1) * pagedResult.PageSize + 1;
+                int endItem = Math.Min(pagedResult.CurrentPage * pagedResult.PageSize, pagedResult.TotalItems);
+            }
+            <span class="text-xs text-gray-500 font-medium">
+                Hiển thị @startItem - @endItem trên @pagedResult.TotalItems thuốc
             </span>
 
-            <div class="flex items-center gap-2">
-                @* Nút Lùi *@
-                <button class="px-3 py-1 border border-border rounded-md hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        disabled="@(currentPage == 1)"
-                        @onclick="() => LoadData(currentPage - 1)">
-                    Trước
+            <div class="flex items-center gap-1">
+                <button disabled="@(currentPage == 1)" @onclick="() => LoadData(currentPage - 1)" class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-white disabled:opacity-50 transition-colors bg-white shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
                 </button>
 
-                @* Các số trang *@
                 @for (int i = 1; i <= pagedResult.TotalPages; i++)
                 {
-                    var pageNumber = i; // Bắt buộc phải gán biến cục bộ trong vòng lặp Blazor
-                                        <button class="px-3 py-1 border rounded-md transition-colors @(currentPage == pageNumber ? "bg-primary text-white border-primary" : "border-border hover:bg-surface-container")"
-                                                @onclick="() => LoadData(pageNumber)">
-                                            @pageNumber
-                                        </button>
+                    var pageNumber = i;
+                    <button class="w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors @(currentPage == pageNumber ? "bg-[#00685f] text-white shadow-sm" : "border border-gray-200 text-gray-600 bg-white hover:bg-gray-50")"
+                            @onclick="() => LoadData(pageNumber)">
+                        @pageNumber
+                    </button>
                 }
 
-                @* Nút Tiến *@
-                <button class="px-3 py-1 border border-border rounded-md hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        disabled="@(currentPage == pagedResult.TotalPages)"
-                        @onclick="() => LoadData(currentPage + 1)">
-                    Sau
+                <button disabled="@(currentPage == pagedResult.TotalPages)" @onclick="() => LoadData(currentPage + 1)" class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-white disabled:opacity-50 transition-colors bg-white shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
                 </button>
             </div>
         </div>
@@ -127,19 +168,58 @@
 </div>
 
 @code {
-    // Đổi từ List sang PagedResult
+    public class MedicineDto
+    {
+        public int MedicineId { get; set; }
+        public string MedicineName { get; set; } = "";
+        public string CategoryName { get; set; } = "";
+
+        // --- THÊM THUỘC TÍNH MỚI VÀO DTO NỘI BỘ ---
+        public string DosageForm { get; set; } = "";
+        public string Uses { get; set; } = "";
+
+        public DateTime? UpdatedAt { get; set; }
+        public string UpdatedBy { get; set; } = "Admin";
+    }
+
+    public class PagedResult<T> { public List<T> Items { get; set; } = new(); public int TotalItems { get; set; } public int CurrentPage { get; set; } public int PageSize { get; set; } public int TotalPages { get; set; } }
+
     private PagedResult<MedicineDto>? pagedResult;
+    private List<MedicineCategoryInputDto> categoriesList = new();
+
+    [SupplyParameterFromQuery(Name = "search")]
+    public string? SearchKeyword { get; set; }
+
+    public string SelectedCategoryId { get; set; } = "";
 
     private string? errorMessage;
     private bool isLoading = true;
-
-    // Tham số phân trang mặc định
     private int currentPage = 1;
     private int pageSize = 10;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadData(currentPage);
+        if (firstRender)
+        {
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+            if (string.IsNullOrEmpty(token)) { NavigationManager.NavigateTo("/login"); return; }
+
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            await LoadCategories();
+            await LoadData(currentPage);
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            var res = await Http.GetFromJsonAsync<PagedResult<MedicineCategoryInputDto>>("api/MedicineCategory?page=1&pageSize=100");
+            if (res != null) categoriesList = res.Items;
+        }
+        catch { /* Bỏ qua để tránh treo giao diện */ }
     }
 
     private async Task LoadData(int page)
@@ -150,51 +230,47 @@
 
         try
         {
-            // Truyền tham số page và pageSize lên API
-            pagedResult = await Http.GetFromJsonAsync<PagedResult<MedicineDto>>($"api/Medicine?page={page}&pageSize={pageSize}");
+            string apiUrl = $"api/Medicine?page={page}&pageSize={pageSize}";
 
-            // Cập nhật lại trang hiện tại sau khi gọi API thành công
-            if (pagedResult != null)
-            {
-                currentPage = pagedResult.CurrentPage;
-            }
+            if (!string.IsNullOrWhiteSpace(SearchKeyword))
+                apiUrl += $"&search={Uri.EscapeDataString(SearchKeyword.Trim())}";
+
+            if (!string.IsNullOrEmpty(SelectedCategoryId) && SelectedCategoryId != "0")
+                apiUrl += $"&categoryId={SelectedCategoryId}";
+
+            pagedResult = await Http.GetFromJsonAsync<PagedResult<MedicineDto>>(apiUrl);
+
+            if (pagedResult != null) currentPage = pagedResult.CurrentPage;
         }
-        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            // Xử lý riêng biệt khi database không có dữ liệu
-            pagedResult = new PagedResult<MedicineDto>();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Kết nối API thất bại. Chi tiết: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized) { NavigationManager.NavigateTo("/login"); }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound) { pagedResult = new PagedResult<MedicineDto>(); }
+        catch (Exception ex) { errorMessage = $"Kết nối API thất bại. Chi tiết: {ex.Message}"; }
+        finally { isLoading = false; StateHasChanged(); }
     }
+
+    private async Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        SelectedCategoryId = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadData(currentPage);
+    }
+
     private async Task DeleteMedicine(int id, string name)
     {
-        // Hiển thị hộp thoại xác nhận
-        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xóa thuốc '{name}' khỏi hệ thống không?");
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xóa thuốc '{name}' khỏi kho không?");
         if (confirmed)
         {
+            isLoading = true;
+            StateHasChanged();
             try
             {
                 var response = await Http.DeleteAsync($"api/Medicine/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    await LoadData(currentPage); // Tải lại trang hiện tại
-                }
-                else
-                {
-                    errorMessage = $"Không thể xóa. Máy chủ trả về lỗi: {response.StatusCode}";
-                }
+                if (response.IsSuccessStatusCode) await LoadData(currentPage);
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) NavigationManager.NavigateTo("/login");
+                else errorMessage = $"Không thể xóa. Máy chủ từ chối: {response.StatusCode}";
             }
-            catch (Exception ex)
-            {
-                errorMessage = $"Lỗi kết nối: {ex.Message}";
-            }
+            catch (Exception ex) { errorMessage = $"Lỗi kết nối mạng: {ex.Message}"; }
+            finally { isLoading = false; StateHasChanged(); }
         }
     }
 }
