@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     // Sử dụng IP máy tính (từ ipconfig) và Port (từ Swagger) để thiết bị/emulator kết nối
-    private static final String BASE_URL = "http://192.168.100.192:5476/";
+    private static final String BASE_URL = "http://10.108.113.38:5476/";
     private static Retrofit retrofit = null;
 
     public static ApiService getApiService() {

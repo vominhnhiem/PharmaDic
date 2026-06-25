@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BCrypt.Net; // Cần dùng thư viện này (hoặc thư viện băm mà bạn dùng trong AuthController)
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PharmaDicBackEnd.ApiService.Models;
+using Microsoft.EntityFrameworkCore;
 using PharmaDicBackEnd.ApiService.DTOs;
+using PharmaDicBackEnd.ApiService.Models;
 using System.Security.Claims;
-using BCrypt.Net; // Cần dùng thư viện này (hoặc thư viện băm mà bạn dùng trong AuthController)
 
 namespace PharmaDicBackEnd.ApiService.Controllers
 {
@@ -93,7 +94,17 @@ namespace PharmaDicBackEnd.ApiService.Controllers
             _context.SaveChanges();
             return Ok(new { message = "Cập nhật thông tin tài khoản thành công!" });
         }
-
+        // Ví dụ thêm vào UserController.cs ở Backend
+        [HttpGet("search-history/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> GetSearchHistory(int userId)
+        {
+            var history = await _context.SearchHistories
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.SearchDate)
+                .ToListAsync();
+            return Ok(history);
+        }
         /// <summary>
         /// [ADMIN] Xóa tài khoản
         /// </summary>
