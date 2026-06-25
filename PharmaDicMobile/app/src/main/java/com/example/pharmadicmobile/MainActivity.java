@@ -1,26 +1,32 @@
 package com.example.pharmadicmobile;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.pharmadicmobile.api.RetrofitClient;
+import com.example.pharmadicmobile.dtos.LoginRequest;
+import com.example.pharmadicmobile.dtos.TokenResponse;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout tabLogin, tabRegister;
-    private TextView tvTabLogin, tvTabRegister;
-    private View indicatorLogin, indicatorRegister;
-    private LinearLayout formLogin, formRegister;
     private Button btnStart;
+    private EditText etEmail, etPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,59 +40,85 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Tự động đăng nhập nếu đã có token
+        checkLoggedIn();
+
         initViews();
-        setupTabs();
         setupLoginAction();
     }
 
-    private void initViews() {
-        tabLogin = findViewById(R.id.tabLogin);
-        tabRegister = findViewById(R.id.tabRegister);
-        tvTabLogin = findViewById(R.id.tvTabLogin);
-        tvTabRegister = findViewById(R.id.tvTabRegister);
-        indicatorLogin = findViewById(R.id.indicatorLogin);
-        indicatorRegister = findViewById(R.id.indicatorRegister);
-        formLogin = findViewById(R.id.formLogin);
-        formRegister = findViewById(R.id.formRegister);
-        btnStart = findViewById(R.id.btnStart);
+    private void checkLoggedIn() {
+        SharedPreferences sharedPreferences = getSharedPreferences("PharmaDic", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("token", null);
+        if (token != null) {
+            navigateToHome();
+        }
     }
 
-    private void setupTabs() {
-        tabLogin.setOnClickListener(v -> switchTab(true));
-        tabRegister.setOnClickListener(v -> switchTab(false));
+    private void initViews() {
+        btnStart = findViewById(R.id.btnStart);
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
     }
 
     private void setupLoginAction() {
         btnStart.setOnClickListener(v -> {
-            // Chuyển sang trang HomeActivity
-            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-            startActivity(intent);
-            // Có thể dùng finish() nếu không muốn quay lại màn hình đăng nhập khi nhấn Back
-            // finish(); 
+            String email = etEmail.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            performLogin(email, password);
         });
     }
 
-    private void switchTab(boolean isLogin) {
-        if (isLogin) {
-            // Active Login
-            tvTabLogin.setTextColor(ContextCompat.getColor(this, R.color.primary));
-            indicatorLogin.setVisibility(View.VISIBLE);
-            formLogin.setVisibility(View.VISIBLE);
+    private void performLogin(String email, String password) {
+        btnStart.setEnabled(false);
+        btnStart.setText("Đang đăng nhập...");
 
-            // Inactive Register
-            tvTabRegister.setTextColor(ContextCompat.getColor(this, R.color.on_surface_variant));
-            indicatorRegister.setVisibility(View.INVISIBLE);
-            formRegister.setVisibility(View.GONE);
-        } else {
-            // Active Register
-            tvTabRegister.setTextColor(ContextCompat.getColor(this, R.color.primary));
-            indicatorRegister.setVisibility(View.VISIBLE);
-            formRegister.setVisibility(View.VISIBLE);
+        LoginRequest loginRequest = new LoginRequest(email, password);
+        RetrofitClient.getApiService().login(loginRequest).enqueue(new Callback<TokenResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TokenResponse> call, @NonNull Response<TokenResponse> response) {
+                btnStart.setEnabled(true);
+                btnStart.setText("Bắt đầu →");
 
-            // Inactive Login
-            tvTabLogin.setTextColor(ContextCompat.getColor(this, R.color.on_surface_variant));
-            indicatorLogin.setVisibility(View.INVISIBLE);
-            formLogin.setVisibility(View.GONE);
-        }
+                if (response.isSuccessful() && response.body() != null) {
+                    TokenResponse tokenResponse = response.body();
+                    saveAuthData(tokenResponse);
+                    Toast.makeText(MainActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                    navigateToHome();
+                } else {
+                    Toast.makeText(MainActivity.this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TokenResponse> call, @NonNull Throwable t) {
+                btnStart.setEnabled(true);
+                btnStart.setText("Bắt đầu →");
+                Toast.makeText(MainActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void saveAuthData(TokenResponse response) {
+        SharedPreferences sharedPreferences = getSharedPreferences("PharmaDic", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("token", response.getToken());
+        editor.putString("role", response.getRole());
+        editor.putInt("userId", response.getUserId());
+        editor.putString("fullName", response.getFullName());
+        editor.putString("email", response.getEmail());
+        editor.apply();
+    }
+
+    private void navigateToHome() {
+        Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

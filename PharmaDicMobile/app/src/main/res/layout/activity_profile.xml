@@ -21,13 +21,6 @@
             android:layout_height="match_parent"
             android:paddingHorizontal="16dp">
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_menu_sort_by_size"
-                app:tint="@color/primary" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -36,14 +29,6 @@
                 android:textColor="@color/primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_popup_reminder"
-                app:tint="@color/primary" />
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -97,30 +82,33 @@
                 </RelativeLayout>
 
                 <TextView
+                    android:id="@+id/tvProfileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Dược sĩ Nguyễn Văn A"
+                    android:text="Người dùng PharmaDic"
                     android:textColor="@color/on_background"
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvProfileEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="nguyenvana@PharmaDic.vn"
+                    android:text="email@example.com"
                     android:textColor="@color/on_surface_variant"
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/tvProfileRole"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_ai_suggestion_light"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
-                    android:text="Dược sĩ cao cấp"
+                    android:text="Thành viên"
                     android:textColor="@color/primary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -223,43 +211,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Notifications -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:padding="16dp">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/social_button_bg"
-                            android:padding="8dp"
-                            android:src="@android:drawable/ic_popup_reminder"
-                            app:tint="@color/primary" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_weight="1"
-                            android:text="Thông báo"
-                            android:textColor="@color/on_background"
-                            android:textSize="16sp" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/ic_media_next"
-                            app:tint="@color/outline_variant" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginHorizontal="16dp"
-                        android:background="@color/outline_variant" />
-
                     <!-- Change Password -->
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -340,6 +291,7 @@
 
             <!-- Logout Button -->
             <Button
+                android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"

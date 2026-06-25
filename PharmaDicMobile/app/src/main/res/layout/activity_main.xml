@@ -40,13 +40,20 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <!-- Logo and Header -->
-            <ImageView
-                android:id="@+id/logo"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
+            <!-- Logo -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="40dp"
-                android:src="@drawable/logo_pharma" />
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp">
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/logo_pharma" />
+            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -54,7 +61,7 @@
                 android:layout_marginTop="16dp"
                 android:text="Chào mừng Dược sĩ"
                 android:textColor="@color/primary"
-                android:textSize="24sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -65,7 +72,7 @@
                 android:textColor="@color/secondary"
                 android:textSize="14sp" />
 
-            <!-- Auth Card -->
+            <!-- Login Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,285 +86,117 @@
                     android:orientation="vertical"
                     android:padding="24dp">
 
-                    <!-- Tab Switcher -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="ĐĂNG NHẬP"
+                        android:textColor="@color/primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/primary" />
+
                     <LinearLayout
+                        android:id="@+id/formLogin"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:layout_marginTop="24dp"
+                        android:orientation="vertical">
 
-                        <LinearLayout
-                            android:id="@+id/tabLogin"
-                            android:layout_width="0dp"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
+                            android:text="Email công tác"
+                            android:textColor="@color/on_surface_variant"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:id="@+id/tvTabLogin"
+                        <EditText
+                            android:id="@+id/etEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/edit_text_bg"
+                            android:drawableStart="@android:drawable/ic_dialog_email"
+                            android:drawablePadding="12dp"
+                            android:hint="pharmacist@hospital.vn"
+                            android:inputType="textEmailAddress"
+                            android:padding="14dp"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="Mật khẩu"
+                            android:textColor="@color/on_surface_variant"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/etPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/edit_text_bg"
+                            android:drawableStart="@android:drawable/ic_lock_idle_lock"
+                            android:drawablePadding="12dp"
+                            android:hint="••••••••"
+                            android:inputType="textPassword"
+                            android:padding="14dp"
+                            android:textSize="14sp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp">
+
+                            <CheckBox
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:padding="12dp"
-                                android:text="ĐĂNG NHẬP"
+                                android:minHeight="0dp"
+                                android:minWidth="0dp"
+                                android:text="Ghi nhớ đăng nhập"
+                                android:textColor="@color/secondary"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:text="Quên mật khẩu?"
                                 android:textColor="@color/primary"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:textSize="12sp" />
+                        </RelativeLayout>
 
-                            <View
-                                android:id="@+id/indicatorLogin"
-                                android:layout_width="match_parent"
-                                android:layout_height="2dp"
-                                android:background="@color/primary" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/tabRegister"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/tvTabRegister"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:padding="12dp"
-                                android:text="ĐĂNG KÝ"
-                                android:textColor="@color/on_surface_variant"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-
-                            <View
-                                android:id="@+id/indicatorRegister"
-                                android:layout_width="match_parent"
-                                android:layout_height="2dp"
-                                android:background="@color/outline_variant"
-                                android:visibility="invisible" />
-                        </LinearLayout>
+                        <Button
+                            android:id="@+id/btnStart"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:layout_marginTop="24dp"
+                            android:background="@drawable/button_primary_bg"
+                            android:text="Bắt đầu →"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
-
-                    <!-- Forms Container -->
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp">
-
-                        <!-- Login Form -->
-                        <LinearLayout
-                            android:id="@+id/formLogin"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:visibility="visible">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:text="Email công tác"
-                                android:textColor="@color/on_surface_variant"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:background="@drawable/edit_text_bg"
-                                android:drawableStart="@android:drawable/ic_dialog_email"
-                                android:drawablePadding="10dp"
-                                android:hint="pharmacist@hospital.vn"
-                                android:inputType="textEmailAddress"
-                                android:padding="12dp"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginTop="16dp"
-                                android:text="Mật khẩu"
-                                android:textColor="@color/on_surface_variant"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:background="@drawable/edit_text_bg"
-                                android:drawableStart="@android:drawable/ic_lock_idle_lock"
-                                android:drawablePadding="10dp"
-                                android:hint="••••••••"
-                                android:inputType="textPassword"
-                                android:padding="12dp"
-                                android:textSize="14sp" />
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp">
-
-                                <CheckBox
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Ghi nhớ đăng nhập"
-                                    android:textColor="@color/on_surface_variant"
-                                    android:textSize="11sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_centerVertical="true"
-                                    android:text="Quên mật khẩu?"
-                                    android:textColor="@color/primary"
-                                    android:textSize="11sp" />
-                            </RelativeLayout>
-
-                            <Button
-                                android:id="@+id/btnStart"
-                                android:layout_width="match_parent"
-                                android:layout_height="56dp"
-                                android:layout_marginTop="24dp"
-                                android:background="@drawable/button_primary_bg"
-                                android:text="Bắt đầu"
-                                android:textAllCaps="false"
-                                android:textColor="@color/white"
-                                android:textSize="18sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Register Form -->
-                        <LinearLayout
-                            android:id="@+id/formRegister"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:visibility="gone">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:text="Họ và Tên"
-                                android:textColor="@color/on_surface_variant"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:background="@drawable/edit_text_bg"
-                                android:drawableStart="@android:drawable/ic_menu_myplaces"
-                                android:drawablePadding="10dp"
-                                android:hint="Nguyễn Văn A"
-                                android:inputType="textPersonName"
-                                android:padding="12dp"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginTop="16dp"
-                                android:text="Email"
-                                android:textColor="@color/on_surface_variant"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:background="@drawable/edit_text_bg"
-                                android:drawableStart="@android:drawable/ic_dialog_email"
-                                android:drawablePadding="10dp"
-                                android:hint="example@email.com"
-                                android:inputType="textEmailAddress"
-                                android:padding="12dp"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginTop="16dp"
-                                android:text="Mật khẩu"
-                                android:textColor="@color/on_surface_variant"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:background="@drawable/edit_text_bg"
-                                android:drawableStart="@android:drawable/ic_lock_idle_lock"
-                                android:drawablePadding="10dp"
-                                android:hint="Tối thiểu 8 ký tự"
-                                android:inputType="textPassword"
-                                android:padding="12dp"
-                                android:textSize="14sp" />
-
-                            <Button
-                                android:layout_width="match_parent"
-                                android:layout_height="56dp"
-                                android:layout_marginTop="24dp"
-                                android:background="@drawable/button_primary_bg"
-                                android:text="Tạo tài khoản"
-                                android:textAllCaps="false"
-                                android:textColor="@color/white"
-                                android:textSize="18sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </FrameLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Secondary Info -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Hoặc tiếp tục với"
-                android:textColor="@color/on_surface_variant"
-                android:textSize="11sp" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/social_button_bg"
-                    android:padding="12dp"
-                    android:scaleType="fitCenter"
-                    android:src="@android:drawable/ic_menu_help" />
-
-                <ImageButton
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="16dp"
-                    android:background="@drawable/social_button_bg"
-                    android:padding="12dp"
-                    android:scaleType="fitCenter"
-                    android:src="@android:drawable/ic_menu_add"
-                    app:tint="@color/secondary" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="40dp"
                 android:text="Điều khoản dịch vụ"
                 android:textColor="@color/secondary"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -366,7 +205,7 @@
                 android:layout_marginBottom="40dp"
                 android:text="Chính sách bảo mật y tế"
                 android:textColor="@color/secondary"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
 
         </LinearLayout>
     </ScrollView>

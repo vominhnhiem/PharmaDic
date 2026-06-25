@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +39,9 @@ public partial class DrugLookupAppContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+
+    public DbSet<AIChatHistory> AIChatHistories { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Disease>(entity =>
@@ -71,15 +74,14 @@ public partial class DrugLookupAppContext : DbContext
 
         modelBuilder.Entity<DrugInteraction>(entity =>
         {
-            entity.HasKey(e => e.InteractionId).HasName("PK__DrugInte__922C03766A653988");
+        entity.HasKey(e => e.InteractionId).HasName("PK__DrugInte__922C03766A653988");
 
-            entity.Property(e => e.InteractionId).HasColumnName("InteractionID");
-            entity.Property(e => e.MedicineId1).HasColumnName("MedicineID1");
-            entity.Property(e => e.MedicineId2).HasColumnName("MedicineID2");
-            entity.Property(e => e.Severity).HasMaxLength(50);
+        entity.Property(e => e.InteractionId).HasColumnName("InteractionID");
+        entity.Property(e => e.MedicineId1).HasColumnName("MedicineID1");
+        entity.Property(e => e.MedicineId2).HasColumnName("MedicineID2");
+        entity.Property(e => e.Severity).HasMaxLength(50);
 
-            entity.HasOne(d => d.MedicineId1Navigation).WithMany(p => p.DrugInteractionMedicineId1Navigations)
-                .HasForeignKey(d => d.MedicineId1)
+        entity.HasOne(d => d.MedicineId1Navigation).WithMany(p => p.DrugInteractionMedicineId1Navigations).HasForeignKey(d => d.MedicineId1)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__DrugInter__Medic__534D60F1");
 
@@ -141,10 +143,9 @@ public partial class DrugLookupAppContext : DbContext
 
         modelBuilder.Entity<MedicineCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Medicine__19093A2B366D8A04");
+        entity.HasKey(e => e.CategoryId).HasName("PK__Medicine__19093A2B366D8A04");
 
-            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
-            entity.Property(e => e.CategoryName).HasMaxLength(100);
+        entity.Property(e => e.CategoryId).HasColumnName("CategoryID"); entity.Property(e => e.CategoryName).HasMaxLength(100);
         });
 
         modelBuilder.Entity<MedicineIngredient>(entity =>
@@ -201,16 +202,15 @@ public partial class DrugLookupAppContext : DbContext
 
         modelBuilder.Entity<Symptom>(entity =>
         {
-            entity.HasKey(e => e.SymptomId).HasName("PK__Symptoms__D26ED8B6AE45016A");
+        entity.HasKey(e => e.SymptomId).HasName("PK__Symptoms__D26ED8B6AE45016A");
 
-            entity.Property(e => e.SymptomId).HasColumnName("SymptomID");
-            entity.Property(e => e.SymptomName).HasMaxLength(150);
+        entity.Property(e => e.SymptomId).HasColumnName("SymptomID");
+        entity.Property(e => e.SymptomName).HasMaxLength(150);
 
-            entity.HasMany(d => d.Diseases).WithMany(p => p.Symptoms)
-                .UsingEntity<Dictionary<string, object>>(
-                    "SymptomDisease",
-                    r => r.HasOne<Disease>().WithMany()
-                        .HasForeignKey("DiseaseId")
+        entity.HasMany(d => d.Diseases).WithMany(p => p.Symptoms)
+            .UsingEntity<Dictionary<string, object>>(
+                "SymptomDisease",
+                r => r.HasOne<Disease>().WithMany().HasForeignKey("DiseaseId")
                         .OnDelete(DeleteBehavior.ClientSetNull)
                         .HasConstraintName("FK__SymptomDi__Disea__4CA06362"),
                     l => l.HasOne<Symptom>().WithMany()
@@ -246,6 +246,33 @@ public partial class DrugLookupAppContext : DbContext
             entity.Property(e => e.Role)
                 .HasMaxLength(50)
                 .HasDefaultValue("Dược sĩ");
+        });
+
+        modelBuilder.Entity<AIChatHistory>(entity =>
+        {
+            entity.ToTable("AIChatHistories");
+
+            entity.HasKey(e => e.ChatId);
+
+            entity.Property(e => e.ChatId)
+                .HasColumnName("ChatID");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("UserID");
+
+            entity.Property(e => e.Question);
+
+            entity.Property(e => e.Answer);
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AIChatHistories_Users");
         });
 
         OnModelCreatingPartial(modelBuilder);

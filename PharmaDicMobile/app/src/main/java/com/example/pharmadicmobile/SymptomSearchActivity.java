@@ -2,20 +2,25 @@ package com.example.pharmadicmobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 public class SymptomSearchActivity extends AppCompatActivity {
 
     private Button btnSearchSymptoms;
-    private LinearLayout navHome;
-    private LinearLayout navAI;
-    private LinearLayout navHistory;
+    private EditText etSymptoms;
+    private ChipGroup chipGroupSuggestions;
+    private LinearLayout navHome, navAI, navProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,34 +34,65 @@ public class SymptomSearchActivity extends AppCompatActivity {
             return insets;
         });
 
+        initViews();
+        setupClickListeners();
+        setupChipListeners();
+    }
+
+    private void initViews() {
         btnSearchSymptoms = findViewById(R.id.btnSearchSymptoms);
+        etSymptoms = findViewById(R.id.etSymptoms);
+        chipGroupSuggestions = findViewById(R.id.chipGroupSuggestions);
+        
         navHome = findViewById(R.id.navHome);
         navAI = findViewById(R.id.navAI);
-        navHistory = findViewById(R.id.navHistory);
+        navProfile = findViewById(R.id.navProfile);
+    }
 
+    private void setupClickListeners() {
         btnSearchSymptoms.setOnClickListener(v -> {
-            // Chuyển sang màn hình Kết quả gợi ý thuốc
+            String symptoms = etSymptoms.getText().toString().trim();
+            if (symptoms.isEmpty()) {
+                Toast.makeText(this, getString(R.string.empty_symptoms), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Intent intent = new Intent(SymptomSearchActivity.this, SearchResultsActivity.class);
+            intent.putExtra("SYMPTOMS_QUERY", symptoms);
             startActivity(intent);
         });
 
-        // Quay lại trang chủ
-        navHome.setOnClickListener(v -> {
+        if (navHome != null) navHome.setOnClickListener(v -> finish());
+        
+        if (navAI != null) navAI.setOnClickListener(v -> {
+            startActivity(new Intent(this, ChatAIActivity.class));
             finish();
         });
+        
+        if (navProfile != null) navProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
+        });
+    }
 
-        // Chuyển sang trang Trợ lý AI
-        navAI.setOnClickListener(v -> {
-            Intent intent = new Intent(SymptomSearchActivity.this, ChatAIActivity.class);
-            startActivity(intent);
-            finish();
-        });
+    private void setupChipListeners() {
+        if (chipGroupSuggestions == null) return;
 
-        // Chuyển sang trang Lịch sử
-        navHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(SymptomSearchActivity.this, HistoryActivity.class);
-            startActivity(intent);
-            finish();
-        });
+        for (int i = 0; i < chipGroupSuggestions.getChildCount(); i++) {
+            View child = chipGroupSuggestions.getChildAt(i);
+            if (child instanceof Chip) {
+                Chip chip = (Chip) child;
+                chip.setOnClickListener(v -> {
+                    String currentText = etSymptoms.getText().toString().trim();
+                    String chipText = chip.getText().toString();
+                    
+                    if (currentText.isEmpty()) {
+                        etSymptoms.setText(chipText);
+                    } else if (!currentText.contains(chipText)) {
+                        etSymptoms.setText(currentText + ", " + chipText);
+                    }
+                    etSymptoms.setSelection(etSymptoms.getText().length());
+                });
+            }
+        }
     }
 }
