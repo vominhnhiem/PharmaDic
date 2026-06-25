@@ -23,20 +23,18 @@
 
     @* BỘ LỌC TÌM KIẾM & DANH MỤC ĐỘNG *@
     <div class="flex gap-4 px-6 py-4 border-b border-gray-100 bg-white rounded-t-xl">
-        <div class="flex items-center bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-md w-64 focus-within:border-[#00685f] transition-colors">
-            <span class="material-symbols-outlined text-gray-400 text-[18px] mr-2">filter_list</span>
+        <div class="relative w-64">
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-500 text-sm">filter_list</span>
 
-            @* SỬA Ở ĐÂY: Lọc theo danh mục động lấy từ SQL Server *@
-            <select @bind="SelectedCategoryId" @bind:after="OnCategoryFilterChanged" class="bg-transparent border-none outline-none text-sm w-full text-gray-600 cursor-pointer focus:ring-0">
+            <select @onchange="OnCategoryChanged" class="w-full pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-md text-sm outline-none focus:ring-1 focus:ring-[#00685f] appearance-none cursor-pointer">
                 <option value="">Tất cả danh mục</option>
                 @foreach (var cat in categoriesList)
                 {
                     <option value="@cat.CategoryId">@cat.CategoryName</option>
                 }
             </select>
+            <span class="material-symbols-outlined absolute right-3 top-2.5 text-gray-500 pointer-events-none text-sm">expand_more</span>
         </div>
-
-        
     </div>
 
     @if (isLoading)
@@ -69,8 +67,9 @@
                     <tr class="border-b border-gray-100 bg-gray-50/50">
                         <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tên thuốc</th>
                         <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Danh mục</th>
-                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Nhà sản xuất</th>
-                        @* ĐÃ XÓA CỘT TRẠNG THÁI KHO THEO YÊU CẦU *@
+                        @* Đã thay đổi 2 cột ở đây *@
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Dạng bào chế</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider w-64">Công dụng chính</th>
                         <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Cập nhật lần cuối</th>
                         <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Thao tác</th>
                     </tr>
@@ -83,7 +82,7 @@
                         <tr class="hover:bg-gray-50/80 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg text-[#00685f] bg-[#00685f]/10 border border-[#00685f]/20 flex items-center justify-center shadow-sm">
+                                    <div class="w-10 h-10 rounded-lg text-[#00685f] bg-[#00685f]/10 border border-[#00685f]/20 flex items-center justify-center shadow-sm flex-shrink-0">
                                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pill</span>
                                     </div>
                                     <div>
@@ -95,13 +94,29 @@
                             <td class="px-6 py-4">
                                 <span class="text-sm text-gray-600">@med.CategoryName</span>
                             </td>
+
+                            @* Thêm cột Dạng bào chế *@
                             <td class="px-6 py-4">
-                                <span class="text-sm text-gray-600">@(string.IsNullOrEmpty(med.Manufacturer) ? "Đang cập nhật" : med.Manufacturer)</span>
+                                <span class="text-sm text-gray-600">@(string.IsNullOrEmpty(med.DosageForm) ? "Chưa rõ" : med.DosageForm)</span>
                             </td>
-                            @* ĐÃ SỬA: Hiển thị thời gian thực từ thuộc tính cơ sở dữ liệu *@
+
+                            @* Thêm cột Công dụng (Dùng truncate để cắt chữ dài, title để hiện tooltip khi hover) *@
+                            <td class="px-6 py-4 max-w-[16rem]">
+                                <span class="text-sm text-gray-600 block truncate" title="@med.Uses">
+                                    @(string.IsNullOrEmpty(med.Uses) ? "Đang cập nhật..." : med.Uses)
+                                </span>
+                            </td>
+
                             <td class="px-6 py-4">
-                                <p class="text-xs text-gray-800 font-medium">@med.UpdatedAt.ToString("HH:mm"),</p>
-                                <p class="text-xs text-gray-500 mt-0.5">@med.UpdatedAt.ToString("dd/MM/yyyy")</p>
+                                @if (med.UpdatedAt.HasValue)
+                                {
+                                    <p class="text-xs text-gray-800 font-medium">@med.UpdatedAt.Value.ToString("HH:mm"),</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">@med.UpdatedAt.Value.ToString("dd/MM/yyyy")</p>
+                                }
+                                else
+                                {
+                                    <p class="text-xs text-gray-500 italic">Chưa cập nhật</p>
+                                }
                                 <p class="text-[10px] text-gray-400 mt-0.5 italic">Bởi @(string.IsNullOrEmpty(med.UpdatedBy) ? "Hệ thống" : med.UpdatedBy)</p>
                             </td>
                             <td class="px-6 py-4">
@@ -153,34 +168,28 @@
 </div>
 
 @code {
-    // THUỘC TÍNH THUỐC (Đã bổ sung trường thời gian thực)
     public class MedicineDto
     {
         public int MedicineId { get; set; }
         public string MedicineName { get; set; } = "";
         public string CategoryName { get; set; } = "";
-        public string DosageForm { get; set; } = "";
-        public string Manufacturer { get; set; } = "";
-        public DateTime UpdatedAt { get; set; } = DateTime.Now; // Trường thời gian thực
-        public string UpdatedBy { get; set; } = "Admin";
-    }
 
-    // Class nhận danh mục để đổ vào Dropdown bộ lọc
-    public class CategoryDropdownDto
-    {
-        public int CategoryId { get; set; }
-        public string CategoryName { get; set; } = "";
+        // --- THÊM THUỘC TÍNH MỚI VÀO DTO NỘI BỘ ---
+        public string DosageForm { get; set; } = "";
+        public string Uses { get; set; } = "";
+
+        public DateTime? UpdatedAt { get; set; }
+        public string UpdatedBy { get; set; } = "Admin";
     }
 
     public class PagedResult<T> { public List<T> Items { get; set; } = new(); public int TotalItems { get; set; } public int CurrentPage { get; set; } public int PageSize { get; set; } public int TotalPages { get; set; } }
 
     private PagedResult<MedicineDto>? pagedResult;
-    private List<CategoryDropdownDto> categoriesList = new(); // Danh sách chứa các danh mục thuốc
+    private List<MedicineCategoryInputDto> categoriesList = new();
 
     [SupplyParameterFromQuery(Name = "search")]
     public string? SearchKeyword { get; set; }
 
-    // Biến lưu trữ ID danh mục đang được chọn để lọc
     public string SelectedCategoryId { get; set; } = "";
 
     private string? errorMessage;
@@ -197,20 +206,17 @@
 
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            // Tải danh mục trước để chuẩn bị cho bộ lọc, sau đó tải danh sách thuốc
             await LoadCategories();
             await LoadData(currentPage);
             StateHasChanged();
         }
     }
 
-    // Hàm gọi API lấy toàn bộ danh mục đổ vào ô Select
     private async Task LoadCategories()
     {
         try
         {
-            // Tận dụng API phân trang danh mục có sẵn của bạn, lấy kích thước lớn để hiển thị đủ danh mục
-            var res = await Http.GetFromJsonAsync<PagedResult<CategoryDropdownDto>>("api/MedicineCategory?page=1&pageSize=100");
+            var res = await Http.GetFromJsonAsync<PagedResult<MedicineCategoryInputDto>>("api/MedicineCategory?page=1&pageSize=100");
             if (res != null) categoriesList = res.Items;
         }
         catch { /* Bỏ qua để tránh treo giao diện */ }
@@ -226,12 +232,10 @@
         {
             string apiUrl = $"api/Medicine?page={page}&pageSize={pageSize}";
 
-            // Nối chuỗi tìm kiếm từ thanh Navbar (nếu có)
             if (!string.IsNullOrWhiteSpace(SearchKeyword))
                 apiUrl += $"&search={Uri.EscapeDataString(SearchKeyword.Trim())}";
 
-            // NẾU CÓ CHỌN DANH MỤC LỌC -> NỐI THÊM THAM SỐ VÀO API
-            if (!string.IsNullOrEmpty(SelectedCategoryId))
+            if (!string.IsNullOrEmpty(SelectedCategoryId) && SelectedCategoryId != "0")
                 apiUrl += $"&categoryId={SelectedCategoryId}";
 
             pagedResult = await Http.GetFromJsonAsync<PagedResult<MedicineDto>>(apiUrl);
@@ -244,10 +248,10 @@
         finally { isLoading = false; StateHasChanged(); }
     }
 
-    // Sự kiện xảy ra khi người dùng thay đổi lựa chọn trên Dropdown danh mục
-    private async Task OnCategoryFilterChanged()
+    private async Task OnCategoryChanged(ChangeEventArgs e)
     {
-        currentPage = 1; // Đưa về trang đầu tiên khi đổi bộ lọc
+        SelectedCategoryId = e.Value?.ToString() ?? "";
+        currentPage = 1;
         await LoadData(currentPage);
     }
 

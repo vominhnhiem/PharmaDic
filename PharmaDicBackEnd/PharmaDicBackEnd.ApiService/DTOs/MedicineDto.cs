@@ -9,5 +9,8 @@
         public string? Manufacturer { get; set; }
         public string? Uses { get; set; }
 
+        public string Sku => $"PH-TH-{MedicineId:D3}";
+        public DateTime? UpdatedAt { get; set; }
+        public string? UpdatedBy { get; set; }
     }
 }
