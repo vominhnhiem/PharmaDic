@@ -69,6 +69,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnLogout = findViewById(R.id.btnLogout);
     }
 /// log
+/// lỗi AI
     private void loadUserData() {
         SharedPreferences sharedPreferences = getSharedPreferences("PharmaDic", Context.MODE_PRIVATE);
 
