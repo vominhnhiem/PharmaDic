@@ -70,6 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 /// log
 /// lỗi AI
+/// đã fix thành công
     private void loadUserData() {
         SharedPreferences sharedPreferences = getSharedPreferences("PharmaDic", Context.MODE_PRIVATE);
 
