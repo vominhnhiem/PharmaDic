@@ -14,7 +14,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private LinearLayout btnHeroSearch, btnHistory, btnAskAI;
     private LinearLayout navSearch, navAI, navProfile;
-    private CardView cardMedicine;
+    private CardView cardMedicine, cardMedicine2, cardMedicine3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +48,8 @@ public class HomeActivity extends AppCompatActivity {
         navAI = findViewById(R.id.navAI);
         navProfile = findViewById(R.id.navProfile);
         cardMedicine = findViewById(R.id.cardMedicine);
+        cardMedicine2 = findViewById(R.id.cardMedicine2);
+        cardMedicine3 = findViewById(R.id.cardMedicine3);
     }
 
     /**
@@ -68,9 +70,21 @@ public class HomeActivity extends AppCompatActivity {
         // Vào trang cá nhân
         navProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
 
-        // Xem chi tiết một loại thuốc
+        // Xem chi tiết các loại thuốc đề xuất
         if (cardMedicine != null) {
-            cardMedicine.setOnClickListener(v -> startActivity(new Intent(this, MedicineDetailActivity.class)));
+            cardMedicine.setOnClickListener(v -> openMedicineDetail(1)); // Ví dụ ID 1
         }
+        if (cardMedicine2 != null) {
+            cardMedicine2.setOnClickListener(v -> openMedicineDetail(2)); // Ví dụ ID 2
+        }
+        if (cardMedicine3 != null) {
+            cardMedicine3.setOnClickListener(v -> openMedicineDetail(3)); // Ví dụ ID 3
+        }
+    }
+
+    private void openMedicineDetail(int medicineId) {
+        Intent intent = new Intent(this, MedicineDetailActivity.class);
+        intent.putExtra("MEDICINE_ID", medicineId);
+        startActivity(intent);
     }
 }
